@@ -22,9 +22,36 @@ func TestScan(t *testing.T) {
 		FileLength: 180400,
 		Version:    1000,
 		ShapeType:  5,
-		MinX:       -180,
-		MinY:       -90,
-		MaxX:       180.00000000000006,
-		MaxY:       83.64513000000001,
+		BoundingBox: shp.BoundingBox{
+			MinX: -180,
+			MinY: -90,
+			MaxX: 180.00000000000006,
+			MaxY: 83.64513000000001,
+		},
 	}, h)
+
+	err = s.Scan()
+	require.NoError(t, err)
+
+	num := 0
+	points := 0
+	for {
+		shape := s.Shape()
+		if shape == nil {
+			break
+		}
+		num++
+
+		switch s := shape.(type) {
+		case *shp.Polygon:
+			for _, p := range s.Parts {
+				points += len(p)
+			}
+		}
+	}
+
+	require.Equal(t, 10641, points)
+
+	require.NoError(t, s.Err())
+	require.Equal(t, 171, num)
 }
