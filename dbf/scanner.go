@@ -1,12 +1,26 @@
 package dbf
 
 import (
+	"fmt"
 	"io"
 	"sync"
+
+	"github.com/mercatormaps/go-shapefile/dbf/dbase5"
+	"github.com/pkg/errors"
+)
+
+type Version uint
+
+const (
+	DBaseLevel5 Version = 3
+	DBaseLevel7 Version = 4
 )
 
 type Scanner struct {
 	in io.Reader
+
+	versionOnce sync.Once
+	version     Version
 
 	headerOnce sync.Once
 	header     Header
@@ -18,6 +32,10 @@ type Scanner struct {
 	err     error
 }
 
+type Header interface {
+	NumRecords() uint32
+}
+
 func NewScanner(r io.Reader) *Scanner {
 	return &Scanner{
 		in:        r,
@@ -25,21 +43,46 @@ func NewScanner(r io.Reader) *Scanner {
 	}
 }
 
-func (s *Scanner) Header() (Header, error) {
+func (s *Scanner) Version() (Version, error) {
 	var err error
-	s.headerOnce.Do(func() {
-		var h Header
-		if h, err = DecodeHeader(s.in); err != nil {
+	s.versionOnce.Do(func() {
+		buf := make([]byte, 1)
+		var n int
+		if n, err = s.in.Read(buf); err != nil {
+			return
+		} else if n != len(buf) {
+			err = fmt.Errorf("read %d bytes but expecting %d", n, len(buf))
 			return
 		}
-		s.header = h
+
+		// dBase version number is first 3 bits
+		s.version = Version(((buf[0]>>0)&1)<<0 | ((buf[0]>>1)&1)<<1 | ((buf[0]>>2)&1)<<2)
+	})
+	return s.version, err
+}
+
+func (s *Scanner) Header() (Header, error) {
+	var err error
+	if _, err = s.Version(); err != nil {
+		return nil, errors.Wrap(err, "failed to parse version number")
+	}
+
+	s.headerOnce.Do(func() {
+		switch s.version {
+		case DBaseLevel5:
+			s.header, err = dbase5.DecodeHeader(s.in)
+		case DBaseLevel7:
+			err = fmt.Errorf("dBase Level 7 is not supported")
+		default:
+			err = fmt.Errorf("unsupported version")
+		}
 	})
 	return s.header, err
 }
 
 func (s *Scanner) Scan() error {
 	if _, err := s.Header(); err != nil {
-		return err
+		return errors.Wrap(err, "failed to parse header")
 	}
 
 	s.scanOnce.Do(func() {

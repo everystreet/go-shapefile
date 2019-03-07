@@ -17,6 +17,10 @@ func TestScanner(t *testing.T) {
 
 	s := dbf.NewScanner(r)
 
+	v, err := s.Version()
+	require.NoError(t, err)
+	require.Equal(t, dbf.DBaseLevel5, v)
+
 	h, err := s.Header()
 	require.NoError(t, err)
 	require.IsType(t, &dbase5.Header{}, h)
