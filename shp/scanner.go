@@ -30,17 +30,17 @@ func NewScanner(r io.Reader) *Scanner {
 func (s *Scanner) Header() (*Header, error) {
 	var err error
 	s.headerOnce.Do(func() {
-		b := make([]byte, 100)
+		buf := make([]byte, 100)
 		var n int
-		if n, err = s.in.Read(b); err != nil {
+		if n, err = s.in.Read(buf); err != nil {
 			return
-		} else if n != 100 {
-			err = fmt.Errorf("expecting to read 100 bytes but only read %d", n)
+		} else if n != len(buf) {
+			err = fmt.Errorf("expecting to read %d bytes but only read %d", len(buf), n)
 			return
 		}
 
 		var h *Header
-		if h, err = DecodeHeader(b); err != nil {
+		if h, err = DecodeHeader(buf); err != nil {
 			return
 		}
 		s.header = *h
