@@ -1,4 +1,4 @@
-package shapefile_test
+package shp_test
 
 import (
 	"os"
@@ -10,7 +10,7 @@ import (
 )
 
 func TestScan(t *testing.T) {
-	r, err := os.Open(filepath.Join("testdata", "ne_110m_admin_0_sovereignty.shp"))
+	r, err := os.Open(filepath.Join("../testdata", "ne_110m_admin_0_sovereignty.shp"))
 	require.NoError(t, err)
 
 	s := shp.NewScanner(r)
