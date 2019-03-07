@@ -5,6 +5,8 @@ import (
 	"fmt"
 	"io"
 	"sync"
+
+	"github.com/pkg/errors"
 )
 
 type Scanner struct {
@@ -50,7 +52,7 @@ func (s *Scanner) Header() (*Header, error) {
 
 func (s *Scanner) Scan() error {
 	if _, err := s.Header(); err != nil {
-		return err
+		return errors.Wrap(err, "failed to parse header")
 	}
 
 	s.scanOnce.Do(func() {
