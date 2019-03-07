@@ -74,8 +74,8 @@ func (p *Polyline) RecordNumber() uint32 {
 
 type Polygon Polyline
 
-func DecodePolygon(rec *record) (*Polygon, error) {
-	p, err := DecodePolyline(rec.shape, rec.number)
+func DecodePolygon(buf []byte, num uint32) (*Polygon, error) {
+	p, err := DecodePolyline(buf, num)
 	if err != nil {
 		return nil, err
 	}
