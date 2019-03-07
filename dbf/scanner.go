@@ -26,7 +26,7 @@ type Scanner struct {
 	header     Header
 
 	scanOnce  sync.Once
-	recordsCh chan *Record
+	recordsCh chan Record
 	num       uint32
 
 	errOnce sync.Once
@@ -38,10 +38,14 @@ type Header interface {
 	NumRecords() uint32
 }
 
+type Record interface {
+	Deleted() bool
+}
+
 func NewScanner(r io.Reader) *Scanner {
 	return &Scanner{
 		in:        r,
-		recordsCh: make(chan *Record),
+		recordsCh: make(chan Record),
 	}
 }
 
@@ -120,7 +124,7 @@ func (s *Scanner) Scan() error {
 	return nil
 }
 
-func (s *Scanner) Record() *Record {
+func (s *Scanner) Record() Record {
 	rec, ok := <-s.recordsCh
 	if !ok {
 		return nil
@@ -133,8 +137,20 @@ func (s *Scanner) Err() error {
 }
 
 func (s *Scanner) decodeRecord(buf []byte) {
-	s.recordsCh <- &Record{}
-	s.num++
+	switch s.version {
+	case DBaseLevel5:
+		rec, err := dbase5.DecodeRecord(buf)
+		if err != nil {
+			s.setErr(NewError(err, s.num))
+			return
+		}
+		s.recordsCh <- rec
+		s.num++
+	case DBaseLevel7:
+		s.setErr(fmt.Errorf("dBase Level 7 is not supported"))
+	default:
+		s.setErr(fmt.Errorf("unsupported version"))
+	}
 }
 
 func (s *Scanner) record() ([]byte, error) {

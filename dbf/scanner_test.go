@@ -37,6 +37,8 @@ func TestScanner(t *testing.T) {
 			break
 		}
 		num++
+
+		require.False(t, rec.Deleted())
 	}
 
 	require.NoError(t, s.Err())
