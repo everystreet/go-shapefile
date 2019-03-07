@@ -27,12 +27,14 @@ type Scanner struct {
 
 	scanOnce  sync.Once
 	recordsCh chan *Record
+	num       uint32
 
 	errOnce sync.Once
 	err     error
 }
 
 type Header interface {
+	RecordLen() uint16
 	NumRecords() uint32
 }
 
@@ -89,16 +91,30 @@ func (s *Scanner) Scan() error {
 		go func() {
 			defer close(s.recordsCh)
 
-			/*for {
+			for s.num < s.header.NumRecords() {
 				rec, err := s.record()
 				if err == io.EOF {
+					s.setErr(fmt.Errorf("unexpected end of file"))
 					return
 				} else if err != nil {
 					s.setErr(err)
 					return
 				}
 				s.decodeRecord(rec)
-			}*/
+			}
+
+			buf := make([]byte, 1)
+			if n, err := s.in.Read(buf); err != nil {
+				s.setErr(fmt.Errorf("unexpected end of file"))
+				return
+			} else if n != len(buf) {
+				s.setErr(fmt.Errorf("read %d bytes but expecting %d", n, len(buf)))
+				return
+			}
+
+			if buf[0] != 0x1A {
+				s.setErr(fmt.Errorf("missing file terminator"))
+			}
 		}()
 	})
 	return nil
@@ -114,4 +130,30 @@ func (s *Scanner) Record() *Record {
 
 func (s *Scanner) Err() error {
 	return s.err
+}
+
+func (s *Scanner) decodeRecord(buf []byte) {
+	s.recordsCh <- &Record{}
+	s.num++
+}
+
+func (s *Scanner) record() ([]byte, error) {
+	buf := make([]byte, s.header.RecordLen())
+	n, err := s.in.Read(buf)
+	if err == io.EOF && s.num != (s.header.NumRecords()-1) {
+		return nil, NewError(
+			fmt.Errorf("unexpected end of file: read %d records but expecting %d", s.num, s.header.NumRecords()),
+			s.num)
+	} else if err != nil {
+		return nil, NewError(err, s.num)
+	} else if n != len(buf) {
+		return nil, NewError(fmt.Errorf("read %d bytes but expecting %d", n, len(buf)), s.num)
+	}
+	return buf, nil
+}
+
+func (s *Scanner) setErr(err error) {
+	s.errOnce.Do(func() {
+		s.err = err
+	})
 }

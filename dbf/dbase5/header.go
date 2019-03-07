@@ -11,6 +11,7 @@ import (
 type Header struct {
 	Fields []Field
 
+	recLen  uint16
 	numRecs uint32
 }
 
@@ -24,6 +25,7 @@ func DecodeHeader(r io.Reader) (*Header, error) {
 	}
 
 	out := &Header{
+		recLen:  binary.LittleEndian.Uint16(buf[9:11]),
 		numRecs: binary.LittleEndian.Uint32(buf[3:7]),
 	}
 
@@ -55,6 +57,10 @@ func DecodeHeader(r io.Reader) (*Header, error) {
 	}
 
 	return out, nil
+}
+
+func (h *Header) RecordLen() uint16 {
+	return h.recLen
 }
 
 func (h *Header) NumRecords() uint32 {

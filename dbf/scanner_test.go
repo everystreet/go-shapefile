@@ -1,7 +1,6 @@
 package dbf_test
 
 import (
-	"fmt"
 	"os"
 	"path/filepath"
 	"testing"
@@ -24,10 +23,22 @@ func TestScanner(t *testing.T) {
 	h, err := s.Header()
 	require.NoError(t, err)
 	require.IsType(t, &dbase5.Header{}, h)
+	require.Equal(t, uint16(1869), h.RecordLen())
 	require.Equal(t, uint32(171), h.NumRecords())
 	require.Len(t, h.(*dbase5.Header).Fields, 94)
 
-	for i, f := range h.(*dbase5.Header).Fields {
-		fmt.Printf("%d) %s: %c\n", i, f.Name, f.Type)
+	err = s.Scan()
+	require.NoError(t, err)
+
+	var num uint32
+	for {
+		rec := s.Record()
+		if rec == nil {
+			break
+		}
+		num++
 	}
+
+	require.NoError(t, s.Err())
+	require.Equal(t, h.NumRecords(), num)
 }
