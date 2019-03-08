@@ -9,7 +9,7 @@ import (
 )
 
 type Header struct {
-	Fields []Field
+	Fields []FieldDesc
 
 	recLen  uint16
 	numRecs uint32
@@ -47,9 +47,9 @@ func DecodeHeader(r io.Reader) (*Header, error) {
 	}
 
 	numFields := (len(buf) - 1) / 32
-	out.Fields = make([]Field, numFields)
+	out.Fields = make([]FieldDesc, numFields)
 	for i := 0; i < numFields; i++ {
-		f, err := DecodeField(buf[i*32 : (i*32)+32])
+		f, err := DecodeFieldDesc(buf[i*32 : (i*32)+32])
 		if err != nil {
 			return nil, errors.Wrapf(err, "failed to decode field %d", i)
 		}

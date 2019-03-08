@@ -86,7 +86,12 @@ func (s *Scanner) Header() (Header, error) {
 	return s.header, err
 }
 
-func (s *Scanner) Scan() error {
+func (s *Scanner) Scan(opts ...Option) error {
+	conf := defaultConfig()
+	for _, opt := range opts {
+		opt(conf)
+	}
+
 	if _, err := s.Header(); err != nil {
 		return errors.Wrap(err, "failed to parse header")
 	}
@@ -104,7 +109,7 @@ func (s *Scanner) Scan() error {
 					s.setErr(err)
 					return
 				}
-				s.decodeRecord(rec)
+				s.decodeRecord(rec, conf)
 			}
 
 			buf := make([]byte, 1)
@@ -136,10 +141,10 @@ func (s *Scanner) Err() error {
 	return s.err
 }
 
-func (s *Scanner) decodeRecord(buf []byte) {
+func (s *Scanner) decodeRecord(buf []byte, conf *Config) {
 	switch s.version {
 	case DBaseLevel5:
-		rec, err := dbase5.DecodeRecord(buf)
+		rec, err := dbase5.DecodeRecord(buf, s.header.(*dbase5.Header), conf)
 		if err != nil {
 			s.setErr(NewError(err, s.num))
 			return

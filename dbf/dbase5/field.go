@@ -1,6 +1,7 @@
 package dbase5
 
 import (
+	"bytes"
 	"fmt"
 )
 
@@ -15,18 +16,22 @@ const (
 	NumericType       FieldType = 'N'
 )
 
-type Field struct {
-	Name string
-	Type FieldType
+type FieldDesc struct {
+	Name   string
+	Type   FieldType
+	Length uint8
 }
 
-func DecodeField(buf []byte) (*Field, error) {
+func DecodeFieldDesc(buf []byte) (*FieldDesc, error) {
 	if len(buf) < 32 {
 		return nil, fmt.Errorf("expecting 32 bytes but have %d", len(buf))
 	}
 
-	return &Field{
-		Name: string(buf[0:11]),
-		Type: FieldType(buf[11]),
+	name := bytes.Trim(buf[0:11], "\x00")
+
+	return &FieldDesc{
+		Name:   string(name),
+		Type:   FieldType(buf[11]),
+		Length: buf[16],
 	}, nil
 }
