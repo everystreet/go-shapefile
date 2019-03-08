@@ -54,8 +54,9 @@ func DecodeRecord(buf []byte, header *Header, conf Config) (*Record, error) {
 		switch desc.Type {
 		case CharacterType:
 			f, err = field.DecodeCharacter(buf[start:end], desc.Name, conf.CharacterEncoding())
+		case NumericType:
+			f, err = field.DecodeNumeric(buf[start:end], desc.Name)
 		default:
-			continue // TODO remove
 			return nil, errors.Wrapf(fmt.Errorf("unsupported field type '%c'", desc.Type),
 				fieldDecodeErr, desc.Name, i)
 		}

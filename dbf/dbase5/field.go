@@ -28,7 +28,6 @@ func DecodeFieldDesc(buf []byte) (*FieldDesc, error) {
 	}
 
 	name := bytes.Trim(buf[0:11], "\x00")
-
 	return &FieldDesc{
 		Name:   string(name),
 		Type:   FieldType(buf[11]),
