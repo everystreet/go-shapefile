@@ -32,14 +32,14 @@ The .dbf file contains attributes for each shape in the .shp file. Attributes ar
 
 This file uses a format called "dBase", of which there are several variations in varying degrees of usage. The most common are dBase IV and dBase V, but `go-shapefile` currently only supports IV. Below is an overview of the supported field types:
 
-| Field type       | Supported |
-| ---------------- |:---------:|
-| Character/string | |
-| Date             | |
-| Floating point   | |
-| Logical          | |
-| Memo             | |
-| Numeric          | |
+| Field type       | Supported          |
+| ---------------- |:------------------:|
+| Character/string | :heavy_check_mark: |
+| Numeric          | :heavy_check_mark: |
+| Date             | :x:                |
+| Floating point   | :x:                |
+| Logical          | :x:                |
+| Memo             | :x:                |
 
 Note that dBase V contains many more field types.
 
