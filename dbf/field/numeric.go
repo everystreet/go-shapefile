@@ -9,7 +9,7 @@ import (
 
 type Numeric struct {
 	Field
-	value float64
+	Number float64
 }
 
 func DecodeNumeric(buf []byte, name string) (*Numeric, error) {
@@ -20,11 +20,11 @@ func DecodeNumeric(buf []byte, name string) (*Numeric, error) {
 	}
 
 	return &Numeric{
-		Field: Field{name: name},
-		value: num,
+		Field:  Field{name: name},
+		Number: num,
 	}, nil
 }
 
-func (n *Numeric) Value() float64 {
-	return n.value
+func (n *Numeric) Value() interface{} {
+	return n.Number
 }

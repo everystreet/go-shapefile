@@ -3,13 +3,14 @@ package field
 import (
 	"bytes"
 	"fmt"
+	"strings"
 
 	"github.com/mercatormaps/go-shapefile/cpg"
 )
 
 type Character struct {
 	Field
-	value string
+	String string
 }
 
 func DecodeCharacter(buf []byte, name string, encoding cpg.CharacterEncoding) (*Character, error) {
@@ -20,14 +21,14 @@ func DecodeCharacter(buf []byte, name string, encoding cpg.CharacterEncoding) (*
 		fallthrough
 	case cpg.UTF8:
 		return &Character{
-			Field: Field{name: name},
-			value: string(val),
+			Field:  Field{name: name},
+			String: strings.TrimSpace(string(val)),
 		}, nil
 	default:
 		return nil, fmt.Errorf("unsupported character encoding")
 	}
 }
 
-func (c *Character) Value() string {
-	return c.value
+func (c *Character) Value() interface{} {
+	return c.String
 }

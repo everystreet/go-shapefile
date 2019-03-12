@@ -69,7 +69,7 @@ func (s *Scanner) Info() (*Info, error) {
 	return &s.info, err
 }
 
-func (s *Scanner) Scan() error {
+func (s *Scanner) Scan(opts ...dbf.Option) error {
 	info, err := s.Info()
 	if err != nil {
 		return err
@@ -78,7 +78,7 @@ func (s *Scanner) Scan() error {
 	s.scanOnce.Do(func() {
 		if err = s.shp.Scan(); err != nil {
 			return
-		} else if err = s.dbf.Scan(); err != nil {
+		} else if err = s.dbf.Scan(opts...); err != nil {
 			return
 		}
 

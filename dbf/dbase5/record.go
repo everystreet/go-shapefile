@@ -3,17 +3,25 @@ package dbase5
 import (
 	"fmt"
 
+	"github.com/mercatormaps/go-shapefile/cpg"
 	"github.com/mercatormaps/go-shapefile/dbf/field"
 	"github.com/pkg/errors"
 )
 
 type Record struct {
+	Fields map[string]Field
+
 	deleted bool
-	fields  map[string]Field
 }
 
 type Field interface {
 	Name() string
+	Value() interface{}
+}
+
+type Config interface {
+	CharacterEncoding() cpg.CharacterEncoding
+	FilteredFields() []string
 }
 
 func DecodeRecord(buf []byte, header *Header, conf Config) (*Record, error) {
@@ -22,7 +30,7 @@ func DecodeRecord(buf []byte, header *Header, conf Config) (*Record, error) {
 	}
 
 	rec := &Record{
-		fields: make(map[string]Field, len(header.Fields)-len(conf.FilteredFields())),
+		Fields: make(map[string]Field, len(header.Fields)-len(conf.FilteredFields())),
 	}
 
 	switch buf[0] {
@@ -64,7 +72,7 @@ func DecodeRecord(buf []byte, header *Header, conf Config) (*Record, error) {
 		if err != nil {
 			return nil, errors.Wrapf(err, fieldDecodeErr, desc.Name, i)
 		}
-		rec.fields[f.Name()] = f
+		rec.Fields[f.Name()] = f
 	}
 
 	return rec, nil
