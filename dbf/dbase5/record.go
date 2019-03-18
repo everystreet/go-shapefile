@@ -44,15 +44,15 @@ func DecodeRecord(buf []byte, header *Header, conf Config) (*Record, error) {
 
 	pos := 1
 	for i, desc := range header.Fields {
-		if len(buf) < (pos + int(desc.Length)) {
-			return nil, errors.Wrapf(fmt.Errorf("expecting %d bytes but have %d", desc.Length, len(buf)-pos),
-				fieldDecodeErr, desc.Name, i)
+		if len(buf) < (pos + int(desc.len)) {
+			return nil, errors.Wrapf(fmt.Errorf("expecting %d bytes but have %d", desc.len, len(buf)-pos),
+				fieldDecodeErr, desc.name, i)
 		}
-		start, end := pos, pos+int(desc.Length)
-		pos += int(desc.Length)
+		start, end := pos, pos+int(desc.len)
+		pos += int(desc.len)
 
 		// filter out unwanted fields
-		if !wantField(desc.Name, conf.FilteredFields()) {
+		if !wantField(desc.name, conf.FilteredFields()) {
 			continue
 		}
 
@@ -61,16 +61,16 @@ func DecodeRecord(buf []byte, header *Header, conf Config) (*Record, error) {
 
 		switch desc.Type {
 		case CharacterType:
-			f, err = field.DecodeCharacter(buf[start:end], desc.Name, conf.CharacterEncoding())
+			f, err = field.DecodeCharacter(buf[start:end], desc.name, conf.CharacterEncoding())
 		case NumericType:
-			f, err = field.DecodeNumeric(buf[start:end], desc.Name)
+			f, err = field.DecodeNumeric(buf[start:end], desc.name)
 		default:
 			return nil, errors.Wrapf(fmt.Errorf("unsupported field type '%c'", desc.Type),
-				fieldDecodeErr, desc.Name, i)
+				fieldDecodeErr, desc.name, i)
 		}
 
 		if err != nil {
-			return nil, errors.Wrapf(err, fieldDecodeErr, desc.Name, i)
+			return nil, errors.Wrapf(err, fieldDecodeErr, desc.name, i)
 		}
 		rec.Fields[f.Name()] = f
 	}

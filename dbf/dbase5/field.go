@@ -17,9 +17,10 @@ const (
 )
 
 type FieldDesc struct {
-	Name   string
-	Type   FieldType
-	Length uint8
+	Type FieldType
+
+	name string
+	len  uint8
 }
 
 func DecodeFieldDesc(buf []byte) (*FieldDesc, error) {
@@ -29,8 +30,12 @@ func DecodeFieldDesc(buf []byte) (*FieldDesc, error) {
 
 	name := bytes.Trim(buf[0:11], "\x00")
 	return &FieldDesc{
-		Name:   string(name),
-		Type:   FieldType(buf[11]),
-		Length: buf[16],
+		Type: FieldType(buf[11]),
+		name: string(name),
+		len:  buf[16],
 	}, nil
+}
+
+func (f *FieldDesc) Name() string {
+	return f.name
 }

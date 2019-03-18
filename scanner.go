@@ -6,6 +6,7 @@ import (
 	"sync"
 
 	"github.com/mercatormaps/go-shapefile/dbf"
+	"github.com/mercatormaps/go-shapefile/dbf/dbase5"
 	"github.com/mercatormaps/go-shapefile/shp"
 	"github.com/pkg/errors"
 )
@@ -28,6 +29,22 @@ type Info struct {
 	BoundingBox shp.BoundingBox
 	NumRecords  uint32
 	ShapeType   shp.ShapeType
+	Fields      FieldDescList
+}
+
+type FieldDescList []FieldDesc
+
+func (l FieldDescList) Exists(name string) bool {
+	for _, f := range l {
+		if f.Name() == name {
+			return true
+		}
+	}
+	return false
+}
+
+type FieldDesc interface {
+	Name() string
 }
 
 type Record struct {
@@ -59,10 +76,23 @@ func (s *Scanner) Info() (*Info, error) {
 			return
 		}
 
+		var fields []FieldDesc
+		switch h := dbfHeader.(type) {
+		case *dbase5.Header:
+			fields = make([]FieldDesc, len(h.Fields))
+			for i, f := range h.Fields {
+				fields[i] = f
+			}
+		default:
+			err = fmt.Errorf("unrecognized dbf header")
+			return
+		}
+
 		s.info = Info{
 			BoundingBox: shpHeader.BoundingBox,
 			NumRecords:  dbfHeader.NumRecords(),
 			ShapeType:   shpHeader.ShapeType,
+			Fields:      fields,
 		}
 	})
 
