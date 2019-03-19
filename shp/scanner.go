@@ -34,10 +34,8 @@ func (s *Scanner) Header() (*Header, error) {
 	s.headerOnce.Do(func() {
 		buf := make([]byte, 100)
 		var n int
-		if n, err = s.in.Read(buf); err != nil {
-			return
-		} else if n != len(buf) {
-			err = fmt.Errorf("expecting to read %d bytes but only read %d", len(buf), n)
+		if n, err = io.ReadFull(s.in, buf); err != nil {
+			err = errors.Wrapf(err, "expecting to read %d bytes but only read %d", len(buf), n)
 			return
 		}
 
@@ -101,36 +99,32 @@ func (s *Scanner) decodeRecord(rec *record) {
 }
 
 func (s *Scanner) record() (*record, error) {
-	b := make([]byte, 12)
-	if n, err := s.in.Read(b); err != nil {
-		return nil, err
-	} else if n != 12 {
-		return nil, fmt.Errorf("expecting to read 12 bytes but only read %d", n)
+	buf := make([]byte, 12)
+	if _, err := io.ReadFull(s.in, buf); err != nil {
+		return nil, io.EOF
 	}
 
-	num := binary.BigEndian.Uint32(b[0:4])
+	num := binary.BigEndian.Uint32(buf[0:4])
 
-	shapeType := ShapeType(binary.LittleEndian.Uint32(b[8:12]))
+	shapeType := ShapeType(binary.LittleEndian.Uint32(buf[8:12]))
 	if shapeType != s.header.ShapeType {
 		return nil, NewError(fmt.Errorf("unexpected shape type; expecting %d, got %d", s.header.ShapeType, shapeType), num)
 	}
 
-	length := binary.BigEndian.Uint32(b[4:8]) * 2 // length is in 16-byte words, so multiply by 2 to get bytes
+	length := binary.BigEndian.Uint32(buf[4:8]) * 2 // length is in 16-byte words, so multiply by 2 to get bytes
 
 	// length is the length of the record, which consists of the shape type and shape data
 	// we've already read the shape type (4 bytes), so the shape data is the next length-4 bytes
-	b = make([]byte, length-4)
-	if n, err := s.in.Read(b); err != nil {
-		return nil, err
-	} else if n != len(b) {
-		return nil, NewError(fmt.Errorf("expecting to read %d bytes but only read %d", len(b), n), num)
+	buf = make([]byte, length-4)
+	if _, err := io.ReadFull(s.in, buf); err != nil {
+		return nil, io.EOF
 	}
 
 	return &record{
 		number:    num,
 		length:    length,
 		shapeType: ShapeType(shapeType),
-		shape:     b,
+		shape:     buf,
 	}, nil
 }
 

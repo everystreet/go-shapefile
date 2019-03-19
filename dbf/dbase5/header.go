@@ -18,10 +18,8 @@ type Header struct {
 func DecodeHeader(r io.Reader) (*Header, error) {
 	// Read first 31 bytes after first byte
 	buf := make([]byte, 31)
-	if n, err := r.Read(buf); err != nil {
-		return nil, err
-	} else if n != len(buf) {
-		return nil, fmt.Errorf("read %d bytes but expecting %d", n, len(buf))
+	if n, err := io.ReadFull(r, buf); err != nil {
+		return nil, errors.Wrapf(err, "read %d bytes but expecting %d", n, len(buf))
 	}
 
 	out := &Header{
@@ -32,10 +30,8 @@ func DecodeHeader(r io.Reader) (*Header, error) {
 	// Read remainder of header
 	headerLen := binary.LittleEndian.Uint16(buf[7:9])
 	buf = make([]byte, int(headerLen)-len(buf)-1)
-	if n, err := r.Read(buf); err != nil {
-		return nil, err
-	} else if n != len(buf) {
-		return nil, fmt.Errorf("read %d bytes but expecting %d", n, len(buf))
+	if n, err := io.ReadFull(r, buf); err != nil {
+		return nil, errors.Wrapf(err, "read %d bytes but expecting %d", n, len(buf))
 	}
 
 	if (len(buf)-1)%32 != 0 {

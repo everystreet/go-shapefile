@@ -54,10 +54,8 @@ func (s *Scanner) Version() (Version, error) {
 	s.versionOnce.Do(func() {
 		buf := make([]byte, 1)
 		var n int
-		if n, err = s.in.Read(buf); err != nil {
-			return
-		} else if n != len(buf) {
-			err = fmt.Errorf("read %d bytes but expecting %d", n, len(buf))
+		if n, err = io.ReadFull(s.in, buf); err != nil {
+			err = errors.Wrapf(err, "read %d bytes but expecting %d", n, len(buf))
 			return
 		}
 
@@ -102,10 +100,7 @@ func (s *Scanner) Scan(opts ...Option) error {
 
 			for s.num < s.header.NumRecords() {
 				rec, err := s.record()
-				if err == io.EOF {
-					s.setErr(fmt.Errorf("unexpected end of file"))
-					return
-				} else if err != nil {
+				if err != nil {
 					s.setErr(err)
 					return
 				}
@@ -113,11 +108,8 @@ func (s *Scanner) Scan(opts ...Option) error {
 			}
 
 			buf := make([]byte, 1)
-			if n, err := s.in.Read(buf); err != nil {
-				s.setErr(fmt.Errorf("unexpected end of file"))
-				return
-			} else if n != len(buf) {
-				s.setErr(fmt.Errorf("read %d bytes but expecting %d", n, len(buf)))
+			if n, err := io.ReadFull(s.in, buf); err != nil {
+				s.setErr(errors.Wrapf(err, "read %d bytes but expecting %d", n, len(buf)))
 				return
 			}
 
@@ -160,15 +152,8 @@ func (s *Scanner) decodeRecord(buf []byte, conf *Config) {
 
 func (s *Scanner) record() ([]byte, error) {
 	buf := make([]byte, s.header.RecordLen())
-	n, err := s.in.Read(buf)
-	if err == io.EOF && s.num != (s.header.NumRecords()-1) {
-		return nil, NewError(
-			fmt.Errorf("unexpected end of file: read %d records but expecting %d", s.num, s.header.NumRecords()),
-			s.num)
-	} else if err != nil {
-		return nil, NewError(err, s.num)
-	} else if n != len(buf) {
-		return nil, NewError(fmt.Errorf("read %d bytes but expecting %d", n, len(buf)), s.num)
+	if n, err := io.ReadFull(s.in, buf); err != nil {
+		return nil, NewError(errors.Wrapf(err, "read %d bytes but expecting %d", n, len(buf)), s.num)
 	}
 	return buf, nil
 }
