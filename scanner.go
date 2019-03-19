@@ -125,13 +125,17 @@ func (s *Scanner) Scan(opts ...dbf.Option) error {
 
 			for i := uint32(0); i < info.NumRecords; i++ {
 				shape := s.shp.Shape()
-				if shape == nil {
+				if err := s.shp.Err(); err != nil {
+					s.setErr(errors.Wrap(err, "error in shp file"))
+				} else if shape == nil {
 					s.setErr(fmt.Errorf("failed to read shape; expecting %d but have read %d", info.NumRecords, i+1))
 					return
 				}
 
 				attr := s.dbf.Record()
-				if attr == nil {
+				if err = s.dbf.Err(); err != nil {
+					s.setErr(errors.Wrap(err, "error in dbf file"))
+				} else if attr == nil {
 					s.setErr(fmt.Errorf("failed to read attributes; expecting %d but have read %d", info.NumRecords, i+1))
 					return
 				}
