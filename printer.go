@@ -10,11 +10,17 @@ import (
 )
 
 type TablePrinter struct {
-	scanner *Scanner
-	fields  []string
+	scanner
+	fields []string
 }
 
-func NewTablePrinter(s *Scanner, fields ...string) (*TablePrinter, error) {
+type scanner interface {
+	Info() (*Info, error)
+	Scan(...dbf.Option) error
+	Record() *Record
+}
+
+func NewTablePrinter(s scanner, fields ...string) (*TablePrinter, error) {
 	info, err := s.Info()
 	if err != nil {
 		return nil, err
@@ -33,7 +39,7 @@ func NewTablePrinter(s *Scanner, fields ...string) (*TablePrinter, error) {
 }
 
 func (p *TablePrinter) Print() error {
-	if err := p.scanner.Scan(dbf.FilterFields(p.fields...)); err != nil {
+	if err := p.Scan(dbf.FilterFields(p.fields...)); err != nil {
 		return err
 	}
 
@@ -43,7 +49,7 @@ func (p *TablePrinter) Print() error {
 	table.SetHeader(append(headers, p.fields...))
 
 	for {
-		rec := p.scanner.Record()
+		rec := p.Record()
 		if rec == nil {
 			break
 		}
