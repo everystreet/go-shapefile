@@ -10,17 +10,18 @@ import (
 )
 
 type TablePrinter struct {
-	scanner
-	fields []string
+	scanner Scannable
+	fields  []string
 }
 
-type scanner interface {
+type Scannable interface {
 	Info() (*Info, error)
 	Scan(...dbf.Option) error
 	Record() *Record
+	Err() error
 }
 
-func NewTablePrinter(s scanner, fields ...string) (*TablePrinter, error) {
+func NewTablePrinter(s Scannable, fields ...string) (*TablePrinter, error) {
 	info, err := s.Info()
 	if err != nil {
 		return nil, err
@@ -39,7 +40,7 @@ func NewTablePrinter(s scanner, fields ...string) (*TablePrinter, error) {
 }
 
 func (p *TablePrinter) Print() error {
-	if err := p.Scan(dbf.FilterFields(p.fields...)); err != nil {
+	if err := p.scanner.Scan(dbf.FilterFields(p.fields...)); err != nil {
 		return err
 	}
 
@@ -49,7 +50,7 @@ func (p *TablePrinter) Print() error {
 	table.SetHeader(append(headers, p.fields...))
 
 	for {
-		rec := p.Record()
+		rec := p.scanner.Record()
 		if rec == nil {
 			break
 		}
@@ -69,6 +70,10 @@ func (p *TablePrinter) Print() error {
 		default:
 			return fmt.Errorf("unrecognized record")
 		}
+	}
+
+	if err := p.scanner.Err(); err != nil {
+		return err
 	}
 
 	table.Render()
