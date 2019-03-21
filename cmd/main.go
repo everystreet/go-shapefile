@@ -32,6 +32,8 @@ func main() {
 		err = fields(*fieldsDbfPath)
 	case dataCommand.FullCommand():
 		switch {
+		case *dataZipPath == "" && *dataShpPath == "" && *dataDbfPath == "":
+			err = fmt.Errorf("no data source specified")
 		case *dataZipPath != "" && (*dataShpPath != "" || *dataDbfPath != ""):
 			err = fmt.Errorf("--zip cannot be used with --shp or --dbf")
 		case *dataZipPath != "":
