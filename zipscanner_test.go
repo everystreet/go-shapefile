@@ -37,4 +37,6 @@ func TestScanZip(t *testing.T) {
 
 	require.NoError(t, s.Err())
 	require.Equal(t, info.NumRecords, num)
+
+	require.NoError(t, r.Close())
 }

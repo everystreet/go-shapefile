@@ -56,6 +56,7 @@ func fields(dbfPath string) error {
 	if err != nil {
 		return errors.Wrapf(err, "failed to open attributes file '%s'", dbfPath)
 	}
+	defer dbfFile.Close()
 
 	s := dbf.NewScanner(dbfFile)
 	header, err := s.Header()
@@ -103,6 +104,7 @@ func dataFromZip(path string, fields *[]string) error {
 	if err != nil {
 		return errors.Wrapf(err, "failed to open zip file '%s'", path)
 	}
+	defer f.Close()
 
 	stat, err := f.Stat()
 	if err != nil {
@@ -134,11 +136,13 @@ func dataFromExtracted(shpPath, dbfPath string, fields *[]string) error {
 	if err != nil {
 		return errors.Wrapf(err, "failed to open shape file '%s'", shpPath)
 	}
+	defer shpFile.Close()
 
 	dbfFile, err := os.Open(dbfPath)
 	if err != nil {
 		return errors.Wrapf(err, "failed to open attributes file '%s'", dbfPath)
 	}
+	defer dbfFile.Close()
 
 	s := shapefile.NewScanner(shpFile, dbfFile)
 

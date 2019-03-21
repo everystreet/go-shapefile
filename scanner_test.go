@@ -35,4 +35,7 @@ func TestScanner(t *testing.T) {
 
 	require.NoError(t, s.Err())
 	require.Equal(t, info.NumRecords, num)
+
+	require.NoError(t, shp.Close())
+	require.NoError(t, dbf.Close())
 }

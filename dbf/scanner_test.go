@@ -43,4 +43,6 @@ func TestScanner(t *testing.T) {
 
 	require.NoError(t, s.Err())
 	require.Equal(t, h.NumRecords(), num)
+
+	require.NoError(t, r.Close())
 }
