@@ -4,6 +4,7 @@ import (
 	"fmt"
 )
 
+// BoundingBox of the shape file.
 type BoundingBox struct {
 	MinX float64
 	MinY float64
@@ -11,6 +12,7 @@ type BoundingBox struct {
 	MaxY float64
 }
 
+// DecodeBoundingBox decodes the bounding box coordinates.
 func DecodeBoundingBox(buf []byte) (*BoundingBox, error) {
 	if len(buf) < 32 {
 		return nil, fmt.Errorf("have %d bytes, expecting >= 32", len(buf))

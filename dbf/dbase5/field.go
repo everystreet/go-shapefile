@@ -5,8 +5,10 @@ import (
 	"fmt"
 )
 
+// FieldType is the type of a field.
 type FieldType uint8
 
+// Field types for dBase Level 5.
 const (
 	CharacterType     FieldType = 'C'
 	DateType          FieldType = 'D'
@@ -16,6 +18,7 @@ const (
 	NumericType       FieldType = 'N'
 )
 
+// FieldDesc represents a field descriptor consisting of a type, name and size in bytes.
 type FieldDesc struct {
 	Type FieldType
 
@@ -23,6 +26,7 @@ type FieldDesc struct {
 	len  uint8
 }
 
+// DecodeFieldDesc parses a single field descriptor.
 func DecodeFieldDesc(buf []byte) (*FieldDesc, error) {
 	if len(buf) < 32 {
 		return nil, fmt.Errorf("expecting 32 bytes but have %d", len(buf))
@@ -36,6 +40,7 @@ func DecodeFieldDesc(buf []byte) (*FieldDesc, error) {
 	}, nil
 }
 
+// Name of the field.
 func (f *FieldDesc) Name() string {
 	return f.name
 }

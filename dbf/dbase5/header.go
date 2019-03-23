@@ -8,6 +8,7 @@ import (
 	"github.com/pkg/errors"
 )
 
+// Header represents a dBase 5 file header.
 type Header struct {
 	Fields []*FieldDesc
 
@@ -15,6 +16,7 @@ type Header struct {
 	numRecs uint32
 }
 
+// DecodeHeader parses a dBase 5 file header.
 func DecodeHeader(r io.Reader) (*Header, error) {
 	// Read first 31 bytes after first byte
 	buf := make([]byte, 31)
@@ -55,10 +57,12 @@ func DecodeHeader(r io.Reader) (*Header, error) {
 	return out, nil
 }
 
+// RecordLen returns the size in bytes of each record in the file.
 func (h *Header) RecordLen() uint16 {
 	return h.recLen
 }
 
+// NumRecords returns the number of records in the file.
 func (h *Header) NumRecords() uint32 {
 	return h.numRecs
 }

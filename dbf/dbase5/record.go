@@ -8,22 +8,26 @@ import (
 	"github.com/pkg/errors"
 )
 
+// Record represents a single record, primarly consisting of a set of fields.
 type Record struct {
 	Fields map[string]Field
 
 	deleted bool
 }
 
+// Field provides common information about all field types.
 type Field interface {
 	Name() string
 	Value() interface{}
 }
 
+// Config provides config for record parsing.
 type Config interface {
 	CharacterEncoding() cpg.CharacterEncoding
 	FilteredFields() []string
 }
 
+// DecodeRecord decodes a dBase 5 single record.
 func DecodeRecord(buf []byte, header *Header, conf Config) (*Record, error) {
 	if len(buf) < 1 {
 		return nil, fmt.Errorf("expecting 1 byte but have %d", len(buf))
@@ -78,6 +82,7 @@ func DecodeRecord(buf []byte, header *Header, conf Config) (*Record, error) {
 	return rec, nil
 }
 
+// Deleted returns the value of the deleted flag.
 func (r *Record) Deleted() bool {
 	return r.deleted
 }

@@ -7,6 +7,7 @@ import (
 	"github.com/pkg/errors"
 )
 
+// Polyline is an ordered set of verticies that consists of one or more parts, where a part is one or more Point.
 type Polyline struct {
 	number uint32
 
@@ -14,6 +15,10 @@ type Polyline struct {
 	Parts       []Part
 }
 
+// Part is a sequence of Points.
+type Part []Point
+
+// DecodePolyline parses a single polyline shape, but does not validate its complicance with the spec.
 func DecodePolyline(buf []byte, num uint32) (*Polyline, error) {
 	box, err := DecodeBoundingBox(buf[0:])
 	if err != nil {
@@ -68,12 +73,15 @@ func DecodePolyline(buf []byte, num uint32) (*Polyline, error) {
 	return out, nil
 }
 
+// RecordNumber returns the position in the shape file.
 func (p *Polyline) RecordNumber() uint32 {
 	return p.number
 }
 
+// Polygon has the same syntax as a Polyline, but the parts should be unbroken rings.
 type Polygon Polyline
 
+// DecodePolygon decodes a single polygon shape, but does not validate its complicance with the spec.
 func DecodePolygon(buf []byte, num uint32) (*Polygon, error) {
 	p, err := DecodePolyline(buf, num)
 	if err != nil {
@@ -82,8 +90,7 @@ func DecodePolygon(buf []byte, num uint32) (*Polygon, error) {
 	return (*Polygon)(p), nil
 }
 
+// RecordNumber returns the position in the shape file.
 func (p *Polygon) RecordNumber() uint32 {
 	return p.number
 }
-
-type Part []Point

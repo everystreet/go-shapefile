@@ -5,6 +5,7 @@ import (
 	"fmt"
 )
 
+// Header represents a shp header.
 type Header struct {
 	FileLength  uint32
 	Version     uint32
@@ -12,6 +13,7 @@ type Header struct {
 	BoundingBox BoundingBox
 }
 
+// DecodeHeader decodes a shp header.
 func DecodeHeader(buf []byte) (*Header, error) {
 	if len(buf) != 100 {
 		return nil, fmt.Errorf("have %d bytes, expecting >= 100", len(buf))

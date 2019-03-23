@@ -9,13 +9,16 @@ import (
 	"github.com/pkg/errors"
 )
 
+// Version is the dBase version or "level".
 type Version uint
 
+// dBase versions.
 const (
 	DBaseLevel5 Version = 3
 	DBaseLevel7 Version = 4
 )
 
+// Scanner parses a dbf file.
 type Scanner struct {
 	in io.Reader
 
@@ -33,15 +36,18 @@ type Scanner struct {
 	err     error
 }
 
+// Header provides common information for all dbf version headers.
 type Header interface {
 	RecordLen() uint16
 	NumRecords() uint32
 }
 
+// Record provides common information for all dbf records.
 type Record interface {
 	Deleted() bool
 }
 
+// NewScanner creates a new Scanner for the supplied source.
 func NewScanner(r io.Reader) *Scanner {
 	return &Scanner{
 		in:        r,
@@ -49,6 +55,8 @@ func NewScanner(r io.Reader) *Scanner {
 	}
 }
 
+// Version reads and returns the dBase version.
+// This function does not validate the version number.
 func (s *Scanner) Version() (Version, error) {
 	var err error
 	s.versionOnce.Do(func() {
@@ -65,6 +73,8 @@ func (s *Scanner) Version() (Version, error) {
 	return s.version, err
 }
 
+// Header invokes the Header method for the appropriate dbase version scanner.
+// A type assertion can be used to access information specific to the version.
 func (s *Scanner) Header() (Header, error) {
 	var err error
 	if _, err = s.Version(); err != nil {
@@ -84,6 +94,9 @@ func (s *Scanner) Header() (Header, error) {
 	return s.header, err
 }
 
+// Scan starts reading the dbf file. Records can be accessed from the Record method.
+// An error is returned if there's a problem parsing the header.
+// Errors that are encountered when parsing records must be checked with the Err method.
 func (s *Scanner) Scan(opts ...Option) error {
 	conf := defaultConfig()
 	for _, opt := range opts {
@@ -121,6 +134,9 @@ func (s *Scanner) Scan(opts ...Option) error {
 	return nil
 }
 
+// Record returns each record found in the dbf file.
+// nil is returned once the last record has been read, or an error occurs -
+// the Err method should be used to check for an error at this point.
 func (s *Scanner) Record() Record {
 	rec, ok := <-s.recordsCh
 	if !ok {
@@ -129,6 +145,8 @@ func (s *Scanner) Record() Record {
 	return rec
 }
 
+// Err returns the first error encountered when parsing records.
+// It should be called after calling the Record method for the last time.
 func (s *Scanner) Err() error {
 	return s.err
 }

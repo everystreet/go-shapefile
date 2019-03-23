@@ -6,6 +6,7 @@ import (
 	"math"
 )
 
+// Point is a single pair of X and Y coordinates.
 type Point struct {
 	number uint32
 
@@ -13,6 +14,7 @@ type Point struct {
 	Y float64
 }
 
+// DecodePoint decodes a single point shape.
 func DecodePoint(buf []byte, num uint32) (*Point, error) {
 	if len(buf) < 16 {
 		return nil, fmt.Errorf("expecting 16 bytes buf only have %d", len(buf))

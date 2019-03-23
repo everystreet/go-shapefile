@@ -9,6 +9,7 @@ import (
 	"github.com/pkg/errors"
 )
 
+// Scanner parses a shp file.
 type Scanner struct {
 	in io.Reader
 
@@ -22,6 +23,7 @@ type Scanner struct {
 	err     error
 }
 
+// NewScanner creates a new Scanner for the supplied source.
 func NewScanner(r io.Reader) *Scanner {
 	return &Scanner{
 		in:       r,
@@ -29,6 +31,7 @@ func NewScanner(r io.Reader) *Scanner {
 	}
 }
 
+// Header parses the shp file header.
 func (s *Scanner) Header() (*Header, error) {
 	var err error
 	s.headerOnce.Do(func() {
@@ -48,6 +51,9 @@ func (s *Scanner) Header() (*Header, error) {
 	return &s.header, err
 }
 
+// Scan starts reading the shp file. Shapes can be accessed from the Shape method.
+// An error is returned if there's a problem parsing the header.
+// Errors that are encountered when parsing records must be checked with the Err method.
 func (s *Scanner) Scan() error {
 	if _, err := s.Header(); err != nil {
 		return errors.Wrap(err, "failed to parse header")
@@ -72,6 +78,9 @@ func (s *Scanner) Scan() error {
 	return nil
 }
 
+// Shape returns each shape found in the shp file.
+// nil is returned once the last record has been read, or an error occurs -
+// the Err method should be used to check for an error at this point.
 func (s *Scanner) Shape() Shape {
 	shape, ok := <-s.shapesCh
 	if !ok {
@@ -80,6 +89,8 @@ func (s *Scanner) Shape() Shape {
 	return shape
 }
 
+// Err returns the first error encountered when parsing records.
+// It should be called after calling the Shape method for the last time.
 func (s *Scanner) Err() error {
 	return s.err
 }

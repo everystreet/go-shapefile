@@ -1,9 +1,13 @@
 package shp
 
+// ShapeType represents a shape type in the shp file.
 type ShapeType uint
 
+// Valid shape types. All shapes in a single shp file must be of the same type.
 const (
-	Null            ShapeType = 0
+	// Null shapes are allowed in any shp file, regardless of the type specified in the header.
+	Null ShapeType = 0
+
 	PointType       ShapeType = 1
 	PolylineType    ShapeType = 3
 	PolygonType     ShapeType = 5
@@ -19,6 +23,7 @@ const (
 	MultiPatchType  ShapeType = 31
 )
 
+// Shape provides common information for all shapes of any type.
 type Shape interface {
 	RecordNumber() uint32
 }

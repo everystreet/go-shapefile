@@ -8,11 +8,13 @@ import (
 	"github.com/mercatormaps/go-shapefile/cpg"
 )
 
+// Character field is a string of characters.
 type Character struct {
 	Field
 	String string
 }
 
+// DecodeCharacter decodes a single character field with the specified encoding.
 func DecodeCharacter(buf []byte, name string, encoding cpg.CharacterEncoding) (*Character, error) {
 	val := bytes.Trim(buf, "\x00")
 
@@ -29,6 +31,7 @@ func DecodeCharacter(buf []byte, name string, encoding cpg.CharacterEncoding) (*
 	}
 }
 
+// Value returns the field value.
 func (c *Character) Value() interface{} {
 	return c.String
 }
