@@ -17,9 +17,9 @@ func DecodeCharacter(buf []byte, name string, encoding cpg.CharacterEncoding) (*
 	val := bytes.Trim(buf, "\x00")
 
 	switch encoding {
-	case cpg.ASCII:
+	case cpg.EncodingASCII:
 		fallthrough
-	case cpg.UTF8:
+	case cpg.EncodingUTF8:
 		return &Character{
 			Field:  Field{name: name},
 			String: strings.TrimSpace(string(val)),

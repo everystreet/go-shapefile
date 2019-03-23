@@ -30,5 +30,7 @@ func (c *Config) FilteredFields() []string {
 }
 
 func defaultConfig() *Config {
-	return &Config{}
+	return &Config{
+		charEnc: cpg.EncodingASCII,
+	}
 }
