@@ -26,6 +26,7 @@ const (
 // Shape provides common information for all shapes of any type.
 type Shape interface {
 	RecordNumber() uint32
+	Validate(*Validator) error
 }
 
 func validShapeType(u uint32) bool {

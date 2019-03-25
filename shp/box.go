@@ -25,3 +25,7 @@ func DecodeBoundingBox(buf []byte) (*BoundingBox, error) {
 		MaxY: bytesToFloat64(buf[24:32]),
 	}, nil
 }
+
+func (b *BoundingBox) String() string {
+	return fmt.Sprintf("(%f,%f), (%f,%f)", b.MaxX, b.MinY, b.MinX, b.MaxY)
+}

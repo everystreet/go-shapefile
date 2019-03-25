@@ -9,6 +9,7 @@ import (
 // Point is a single pair of X and Y coordinates.
 type Point struct {
 	number uint32
+	box    *BoundingBox
 
 	X float64
 	Y float64
@@ -25,6 +26,15 @@ func DecodePoint(buf []byte, num uint32) (*Point, error) {
 		Y:      bytesToFloat64(buf[8:16]),
 		number: num,
 	}, nil
+}
+
+// RecordNumber returns the position in the shape file.
+func (p *Point) RecordNumber() uint32 {
+	return p.number
+}
+
+func (p *Point) String() string {
+	return fmt.Sprintf("(%f,%f)", p.X, p.Y)
 }
 
 func bytesToFloat64(b []byte) float64 {

@@ -66,6 +66,7 @@ func DecodePolyline(buf []byte, num uint32) (*Polyline, error) {
 			if err != nil {
 				return nil, errors.Wrap(err, "failed to decode point")
 			}
+			p.box = box
 			out.Parts[i][j] = *p
 		}
 	}

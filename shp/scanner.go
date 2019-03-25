@@ -51,6 +51,15 @@ func (s *Scanner) Header() (*Header, error) {
 	return &s.header, err
 }
 
+// Validator returns a Validator that can be used to validate Shapes using the Validate method.
+func (s *Scanner) Validator() (*Validator, error) {
+	h, err := s.Header()
+	if err != nil {
+		return nil, errors.Wrap(err, "failed to decode header")
+	}
+	return NewValidator(&h.BoundingBox), nil
+}
+
 // Scan starts reading the shp file. Shapes can be accessed from the Shape method.
 // An error is returned if there's a problem parsing the header.
 // Errors that are encountered when parsing records must be checked with the Err method.
@@ -97,15 +106,17 @@ func (s *Scanner) Err() error {
 
 func (s *Scanner) decodeRecord(rec *record) {
 	shape, err := s.decodeShape(rec)
-		if err != nil {
-			s.setErr(NewError(err, rec.number))
-			return
-		}
+	if err != nil {
+		s.setErr(NewError(err, rec.number))
+		return
+	}
 	s.shapesCh <- shape
 }
 
 func (s *Scanner) decodeShape(rec *record) (Shape, error) {
 	switch rec.shapeType {
+	case PointType:
+		return DecodePoint(rec.shape, rec.number)
 	case PolylineType:
 		return DecodePolyline(rec.shape, rec.number)
 	case PolygonType:

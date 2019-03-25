@@ -33,14 +33,19 @@ func TestScan(t *testing.T) {
 	err = s.Scan()
 	require.NoError(t, err)
 
-	num := 0
+	v, err := s.Validator()
+	require.NoError(t, err)
+
+	shapes := 0
 	points := 0
 	for {
 		shape := s.Shape()
 		if shape == nil {
 			break
 		}
-		num++
+		shapes++
+
+		require.NoError(t, shape.Validate(v))
 
 		switch s := shape.(type) {
 		case *shp.Polygon:
@@ -53,7 +58,7 @@ func TestScan(t *testing.T) {
 	require.Equal(t, 10641, points)
 
 	require.NoError(t, s.Err())
-	require.Equal(t, 171, num)
+	require.Equal(t, 171, shapes)
 
 	require.NoError(t, r.Close())
 }
