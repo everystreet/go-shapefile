@@ -96,16 +96,22 @@ func (s *Scanner) Err() error {
 }
 
 func (s *Scanner) decodeRecord(rec *record) {
-	switch rec.shapeType {
-	case PolygonType:
-		p, err := DecodePolygon(rec.shape, rec.number)
+	shape, err := s.decodeShape(rec)
 		if err != nil {
 			s.setErr(NewError(err, rec.number))
 			return
 		}
-		s.shapesCh <- p
+	s.shapesCh <- shape
+}
+
+func (s *Scanner) decodeShape(rec *record) (Shape, error) {
+	switch rec.shapeType {
+	case PolylineType:
+		return DecodePolyline(rec.shape, rec.number)
+	case PolygonType:
+		return DecodePolygon(rec.shape, rec.number)
 	default:
-		s.setErr(NewError(fmt.Errorf("unknown shape type %d", rec.shapeType), rec.number))
+		return nil, fmt.Errorf("unknown shape type %d", rec.shapeType)
 	}
 }
 
