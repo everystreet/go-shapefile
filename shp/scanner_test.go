@@ -13,7 +13,7 @@ func TestScan(t *testing.T) {
 	r, err := os.Open(filepath.Join("../testdata", "ne_110m_admin_0_sovereignty.shp"))
 	require.NoError(t, err)
 
-	s := shp.NewScanner(r)
+	s := shp.NewScanner(r, shp.PointPrecision(6))
 
 	h, err := s.Header()
 	require.NoError(t, err)
@@ -21,12 +21,12 @@ func TestScan(t *testing.T) {
 	require.Equal(t, &shp.Header{
 		FileLength: 180400,
 		Version:    1000,
-		ShapeType:  5,
+		ShapeType:  shp.PolygonType,
 		BoundingBox: shp.BoundingBox{
-			MinX: -180,
-			MinY: -90,
-			MaxX: 180.00000000000006,
-			MaxY: 83.64513000000001,
+			MinX: -180.000000,
+			MinY: -90.000000,
+			MaxX: 180.000000,
+			MaxY: 83.645130,
 		},
 	}, h)
 

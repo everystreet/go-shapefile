@@ -11,7 +11,8 @@ import (
 
 // Scanner parses a shp file.
 type Scanner struct {
-	in io.Reader
+	in   io.Reader
+	opts []Option
 
 	headerOnce sync.Once
 	header     Header
@@ -24,9 +25,10 @@ type Scanner struct {
 }
 
 // NewScanner creates a new Scanner for the supplied source.
-func NewScanner(r io.Reader) *Scanner {
+func NewScanner(r io.Reader, opts ...Option) *Scanner {
 	return &Scanner{
 		in:       r,
+		opts:     opts,
 		shapesCh: make(chan Shape),
 	}
 }
@@ -43,7 +45,7 @@ func (s *Scanner) Header() (*Header, error) {
 		}
 
 		var h *Header
-		if h, err = DecodeHeader(buf); err != nil {
+		if h, err = DecodeHeader(buf, s.opts...); err != nil {
 			return
 		}
 		s.header = *h
@@ -64,6 +66,11 @@ func (s *Scanner) Validator() (*Validator, error) {
 // An error is returned if there's a problem parsing the header.
 // Errors that are encountered when parsing records must be checked with the Err method.
 func (s *Scanner) Scan() error {
+	conf := defaultConfig()
+	for _, opt := range s.opts {
+		opt(conf)
+	}
+
 	if _, err := s.Header(); err != nil {
 		return errors.Wrap(err, "failed to parse header")
 	}
@@ -80,7 +87,7 @@ func (s *Scanner) Scan() error {
 					s.setErr(err)
 					return
 				}
-				s.decodeRecord(rec)
+				s.decodeRecord(rec, conf)
 			}
 		}()
 	})
@@ -104,8 +111,15 @@ func (s *Scanner) Err() error {
 	return s.err
 }
 
-func (s *Scanner) decodeRecord(rec *record) {
-	shape, err := s.decodeShape(rec)
+func (s *Scanner) decodeRecord(rec *record, conf *Config) {
+	var shape Shape
+	var err error
+	if conf.precision == nil {
+		shape, err = s.decodeShape(rec)
+	} else {
+		shape, err = s.decodeShapeP(rec, *conf.precision)
+	}
+
 	if err != nil {
 		s.setErr(NewError(err, rec.number))
 		return
@@ -121,6 +135,19 @@ func (s *Scanner) decodeShape(rec *record) (Shape, error) {
 		return DecodePolyline(rec.shape, rec.number)
 	case PolygonType:
 		return DecodePolygon(rec.shape, rec.number)
+	default:
+		return nil, fmt.Errorf("unknown shape type %d", rec.shapeType)
+	}
+}
+
+func (s *Scanner) decodeShapeP(rec *record, precision uint) (Shape, error) {
+	switch rec.shapeType {
+	case PointType:
+		return DecodePointP(rec.shape, rec.number, precision)
+	case PolylineType:
+		return DecodePolylineP(rec.shape, rec.number, precision)
+	case PolygonType:
+		return DecodePolygonP(rec.shape, rec.number, precision)
 	default:
 		return nil, fmt.Errorf("unknown shape type %d", rec.shapeType)
 	}
