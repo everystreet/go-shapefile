@@ -4,7 +4,7 @@ import (
 	"github.com/mercatormaps/go-shapefile/cpg"
 )
 
-// Option funcs can be parsed to Scanner.Scan().
+// Option funcs can be passed to Scanner.Scan().
 type Option func(*Config)
 
 // CharacterEncoding sets the encoding of character field values.
