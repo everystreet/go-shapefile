@@ -112,6 +112,14 @@ func (s *Scanner) Err() error {
 }
 
 func (s *Scanner) decodeRecord(rec *record, conf *Config) {
+	if rec.shapeType == Null {
+		return
+	} else if rec.shapeType != s.header.ShapeType {
+		err := fmt.Errorf("shape type %d differs to specified type %d", rec.shapeType, s.header.ShapeType)
+		s.setErr(NewError(err, rec.number))
+		return
+	}
+
 	var shape Shape
 	var err error
 	if conf.precision == nil {
