@@ -8,11 +8,11 @@ import (
 
 // Point is a single pair of X and Y coordinates.
 type Point struct {
-	number uint32
-	box    *BoundingBox
-
 	X float64
 	Y float64
+
+	number uint32
+	box    *BoundingBox
 }
 
 // DecodePoint decodes a single point shape.

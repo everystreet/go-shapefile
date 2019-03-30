@@ -59,7 +59,7 @@ func (s *Scanner) Validator() (*Validator, error) {
 	if err != nil {
 		return nil, errors.Wrap(err, "failed to decode header")
 	}
-	return NewValidator(&h.BoundingBox), nil
+	return NewValidator(&h.BoundingBox)
 }
 
 // Scan starts reading the shp file. Shapes can be accessed from the Shape method.

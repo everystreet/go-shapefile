@@ -9,10 +9,10 @@ import (
 
 // Polyline is an ordered set of verticies that consists of one or more parts, where a part is one or more Point.
 type Polyline struct {
-	number uint32
-
 	BoundingBox BoundingBox
 	Parts       []Part
+
+	number uint32
 }
 
 // Part is a sequence of Points.

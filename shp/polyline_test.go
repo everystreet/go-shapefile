@@ -18,9 +18,24 @@ func TestDecodePolyline(t *testing.T) {
 	require.Equal(t, box, p.BoundingBox)
 
 	require.Equal(t, 3, len(p.Parts))
-	require.Equal(t, part1, p.Parts[0])
-	require.Equal(t, part2, p.Parts[1])
-	require.Equal(t, part3, p.Parts[2])
+	pointsEqual(t, part1, p.Parts[0])
+	pointsEqual(t, part2, p.Parts[1])
+	pointsEqual(t, part3, p.Parts[2])
+}
+
+func pointsEqual(t *testing.T, expected, actual []shp.Point) {
+	require.Equal(t, normalizePoints(expected), normalizePoints(actual))
+}
+
+func normalizePoints(points []shp.Point) []shp.Point {
+	out := make([]shp.Point, len(points))
+	for i, p := range points {
+		out[i] = shp.Point{
+			X: p.X,
+			Y: p.Y,
+		}
+	}
+	return out
 }
 
 // 404 bytes of a polyline taken from Natural Earth.
