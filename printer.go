@@ -4,7 +4,6 @@ import (
 	"fmt"
 	"os"
 
-	"github.com/mercatormaps/go-shapefile/dbf"
 	"github.com/mercatormaps/go-shapefile/dbf/dbase5"
 	"github.com/olekukonko/tablewriter"
 )
@@ -15,8 +14,9 @@ type TablePrinter struct {
 }
 
 type Scannable interface {
+	AddOptions(...Option)
 	Info() (*Info, error)
-	Scan(...dbf.Option) error
+	Scan() error
 	Record() *Record
 	Err() error
 }
@@ -33,6 +33,7 @@ func NewTablePrinter(s Scannable, fields ...string) (*TablePrinter, error) {
 		}
 	}
 
+	s.AddOptions(FilterFields(fields...))
 	return &TablePrinter{
 		scanner: s,
 		fields:  fields,
@@ -40,7 +41,7 @@ func NewTablePrinter(s Scannable, fields ...string) (*TablePrinter, error) {
 }
 
 func (p *TablePrinter) Print() error {
-	if err := p.scanner.Scan(dbf.FilterFields(p.fields...)); err != nil {
+	if err := p.scanner.Scan(); err != nil {
 		return err
 	}
 

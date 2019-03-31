@@ -7,11 +7,12 @@ import (
 	"strings"
 	"sync"
 
-	"github.com/mercatormaps/go-shapefile/dbf"
 	"github.com/pkg/errors"
 )
 
 type ZipScanner struct {
+	opts []Option
+
 	in   *zip.Reader
 	name string
 
@@ -19,7 +20,7 @@ type ZipScanner struct {
 	scanner  *Scanner
 }
 
-func NewZipScanner(r io.ReaderAt, size int64, filename string) (*ZipScanner, error) {
+func NewZipScanner(r io.ReaderAt, size int64, filename string, opts ...Option) (*ZipScanner, error) {
 	in, err := zip.NewReader(r, size)
 	if err != nil {
 		return nil, err
@@ -30,9 +31,14 @@ func NewZipScanner(r io.ReaderAt, size int64, filename string) (*ZipScanner, err
 	}
 
 	return &ZipScanner{
+		opts: opts,
 		in:   in,
 		name: strings.TrimSuffix(filename, ".zip"),
 	}, nil
+}
+
+func (s *ZipScanner) AddOptions(opts ...Option) {
+	s.opts = append(s.opts, opts...)
 }
 
 func (s *ZipScanner) Info() (*Info, error) {
@@ -42,11 +48,11 @@ func (s *ZipScanner) Info() (*Info, error) {
 	return s.scanner.Info()
 }
 
-func (s *ZipScanner) Scan(opts ...dbf.Option) error {
+func (s *ZipScanner) Scan() error {
 	if err := s.init(); err != nil {
 		return err
 	}
-	return s.scanner.Scan(opts...)
+	return s.scanner.Scan()
 }
 
 func (s *ZipScanner) Record() *Record {
@@ -87,7 +93,7 @@ func (s *ZipScanner) init() error {
 			return
 		}
 
-		s.scanner = NewScanner(shpR, dbfR)
+		s.scanner = NewScanner(shpR, dbfR, s.opts...)
 	})
 
 	return err

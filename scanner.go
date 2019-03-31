@@ -12,8 +12,9 @@ import (
 )
 
 type Scanner struct {
-	shp *shp.Scanner
-	dbf *dbf.Scanner
+	shp  *shp.Scanner
+	dbf  *dbf.Scanner
+	opts Options
 
 	infoOnce sync.Once
 	info     Info
@@ -52,12 +53,24 @@ type Record struct {
 	Attributes dbf.Record
 }
 
-func NewScanner(shpR, dbfR io.Reader) *Scanner {
-	return &Scanner{
-		shp:       shp.NewScanner(shpR),
+func NewScanner(shpR, dbfR io.Reader, opts ...Option) *Scanner {
+	s := &Scanner{
 		dbf:       dbf.NewScanner(dbfR),
 		recordsCh: make(chan *Record),
 	}
+
+	for _, opt := range opts {
+		opt(&s.opts)
+	}
+	s.shp = shp.NewScanner(shpR, s.opts.shp...)
+	return s
+}
+
+func (s *Scanner) AddOptions(opts ...Option) {
+	for _, opt := range opts {
+		opt(&s.opts)
+	}
+	s.shp.AddOptions(s.opts.shp...)
 }
 
 func (s *Scanner) Info() (*Info, error) {
@@ -99,7 +112,7 @@ func (s *Scanner) Info() (*Info, error) {
 	return &s.info, err
 }
 
-func (s *Scanner) Scan(opts ...dbf.Option) error {
+func (s *Scanner) Scan() error {
 	info, err := s.Info()
 	if err != nil {
 		return err
@@ -108,7 +121,7 @@ func (s *Scanner) Scan(opts ...dbf.Option) error {
 	s.scanOnce.Do(func() {
 		if err = s.shp.Scan(); err != nil {
 			return
-		} else if err = s.dbf.Scan(opts...); err != nil {
+		} else if err = s.dbf.Scan(s.opts.dbf...); err != nil {
 			return
 		}
 

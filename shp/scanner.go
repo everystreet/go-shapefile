@@ -33,6 +33,11 @@ func NewScanner(r io.Reader, opts ...Option) *Scanner {
 	}
 }
 
+// AddOptions to scanner after creation.
+func (s *Scanner) AddOptions(opts ...Option) {
+	s.opts = append(s.opts, opts...)
+}
+
 // Header parses the shp file header.
 func (s *Scanner) Header() (*Header, error) {
 	var err error
