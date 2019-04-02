@@ -18,7 +18,8 @@ Reading a zipped shapefile is achieved by using the `ZipScanner`. The example be
 file, err := os.Open("path/to/ne_110m_admin_0_sovereignty.zip")
 stat, err := r.Stat()
 
-// Create new ZipScanner. The filename can be replaced with an empty string if you don't want to check filenames inside the zip file
+// Create new ZipScanner
+// The filename can be replaced with an empty string if you don't want to check filenames inside the zip file
 scanner := shapefile.NewZipScanner(file, stat.Size(), "ne_110m_admin_0_sovereignty.zip")
 
 // Optionally get file info: shape type, number of records, bounding box, etc.
