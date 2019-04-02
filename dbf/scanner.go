@@ -29,7 +29,7 @@ type Scanner struct {
 	header     Header
 
 	scanOnce  sync.Once
-	recordsCh chan Record
+	recordsCh chan *Record
 	num       uint32
 
 	errOnce sync.Once
@@ -42,16 +42,11 @@ type Header interface {
 	NumRecords() uint32
 }
 
-// Record provides common information for all dbf records.
-type Record interface {
-	Deleted() bool
-}
-
 // NewScanner creates a new Scanner for the supplied source.
 func NewScanner(r io.Reader) *Scanner {
 	return &Scanner{
 		in:        r,
-		recordsCh: make(chan Record),
+		recordsCh: make(chan *Record),
 	}
 }
 
@@ -137,7 +132,7 @@ func (s *Scanner) Scan(opts ...Option) error {
 // Record returns each record found in the dbf file.
 // nil is returned once the last record has been read, or an error occurs -
 // the Err method should be used to check for an error at this point.
-func (s *Scanner) Record() Record {
+func (s *Scanner) Record() *Record {
 	rec, ok := <-s.recordsCh
 	if !ok {
 		return nil
@@ -159,7 +154,9 @@ func (s *Scanner) decodeRecord(buf []byte, conf *Config) {
 			s.setErr(NewError(err, s.num))
 			return
 		}
-		s.recordsCh <- rec
+		s.recordsCh <- &Record{
+			rec: rec,
+		}
 		s.num++
 	case DBaseLevel7:
 		s.setErr(fmt.Errorf("dBase Level 7 is not supported"))

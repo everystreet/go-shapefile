@@ -50,7 +50,7 @@ type FieldDesc interface {
 
 type Record struct {
 	Shape      shp.Shape
-	Attributes dbf.Record
+	Attributes *dbf.Record
 }
 
 func NewScanner(shpR, dbfR io.Reader, opts ...Option) *Scanner {

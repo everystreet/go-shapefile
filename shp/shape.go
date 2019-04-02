@@ -25,6 +25,7 @@ const (
 
 // Shape provides common information for all shapes of any type.
 type Shape interface {
+	Type() ShapeType
 	RecordNumber() uint32
 	Validate(*Validator) error
 }

@@ -25,6 +25,11 @@ func DecodePointP(buf []byte, num uint32, precision uint) (*Point, error) {
 	return decodePoint(buf, num, &precision)
 }
 
+// Type is PointType.
+func (p *Point) Type() ShapeType {
+	return PointType
+}
+
 // RecordNumber returns the position in the shape file.
 func (p *Point) RecordNumber() uint32 {
 	return p.number

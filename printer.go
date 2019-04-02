@@ -4,7 +4,6 @@ import (
 	"fmt"
 	"os"
 
-	"github.com/mercatormaps/go-shapefile/dbf/dbase5"
 	"github.com/olekukonko/tablewriter"
 )
 
@@ -56,21 +55,14 @@ func (p *TablePrinter) Print() error {
 			break
 		}
 
-		switch r := rec.Attributes.(type) {
-		case *dbase5.Record:
-			row := make([]string, len(p.fields)+1)
-			row[0] = fmt.Sprintf("%d", rec.Shape.RecordNumber())
-
-			for i, name := range p.fields {
-				if f, ok := r.Fields[name]; ok {
-					row[i+1] = fmt.Sprintf("%v", f.Value())
-				}
+		row := make([]string, len(p.fields)+1)
+		row[0] = fmt.Sprintf("%d", rec.Shape.RecordNumber())
+		for i, name := range p.fields {
+			if f, ok := rec.Attributes.Field(name); ok {
+				row[i+1] = fmt.Sprintf("%v", f.Value())
 			}
-
-			table.Append(row)
-		default:
-			return fmt.Errorf("unrecognized record")
 		}
+		table.Append(row)
 	}
 
 	if err := p.scanner.Err(); err != nil {

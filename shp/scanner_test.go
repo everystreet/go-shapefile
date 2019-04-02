@@ -45,6 +45,7 @@ func TestScan(t *testing.T) {
 		}
 		shapes++
 
+		require.Equal(t, h.ShapeType, shape.Type())
 		require.NoError(t, shape.Validate(v))
 
 		switch s := shape.(type) {
