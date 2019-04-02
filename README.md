@@ -10,6 +10,39 @@ How you choose to use this package will depend on your use case. `go-shapefile` 
 * Unzipped .shp and .dbf files, with optional character encoding
 * .shp and .dbf files separately, with optional character encoding
 
+### Basic example
+
+Reading a zipped shapefile is achieved by using the `ZipScanner`. The example below shows a basic example of this, where error handling has been omitted for brevity.
+
+```go
+file, err := os.Open("path/to/ne_110m_admin_0_sovereignty.zip")
+stat, err := r.Stat()
+
+// Create new ZipScanner. The filename can be replaced with an empty string if you don't want to check filenames inside the zip file
+scanner := shapefile.NewZipScanner(file, stat.Size(), "ne_110m_admin_0_sovereignty.zip")
+
+// Optionally get file info: shape type, number of records, bounding box, etc.
+info, err := scanner.Info()
+fmt.Println(info)
+
+// Start the scanner
+err = scanner.Scan()
+
+// Call Record() to get each record in turn, until either the end of the file, or an error occurs
+for {
+    record := scanner.Record()
+    if record == nil {
+        break
+    }
+
+    // Each record contains a shape (from .shp file) and attributes (from .dbf file)
+    fmt.Println(record)
+}
+
+// Err() returns the first error encountered during calls to Record()
+err = scanner.Err()
+```
+
 ## Features
 
 This package has been primarily developed to work with [Natural Earth](https://www.naturalearthdata.com/), so may only contain the subset of shapefile features relevant to those data files. The "shapefile" format is actually a collection of files, of which this package currently supports the "shape" (.shp), "attribute" (.dbf) and character encoding (.cpg) files.
