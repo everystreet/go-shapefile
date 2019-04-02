@@ -67,9 +67,15 @@ func dataFromZip(path string, fields *[]string, meta bool) error {
 
 	_, name := filepath.Split(path)
 
-	s, err := shapefile.NewZipScanner(f, stat.Size(), name)
-	if err != nil {
-		return err
+	var s *shapefile.ZipScanner
+	if fields == nil {
+		if s, err = shapefile.NewZipScanner(f, stat.Size(), name); err != nil {
+			return err
+		}
+	} else {
+		if s, err = shapefile.NewZipScanner(f, stat.Size(), name, shapefile.FilterFields(*fields...)); err != nil {
+			return err
+		}
 	}
 
 	if meta {
@@ -95,7 +101,12 @@ func dataFromExtracted(shpPath, dbfPath string, fields *[]string) error {
 	}
 	defer dbfFile.Close()
 
-	s := shapefile.NewScanner(shpFile, dbfFile)
+	var s *shapefile.Scanner
+	if fields == nil {
+		s = shapefile.NewScanner(shpFile, dbfFile)
+	} else {
+		s = shapefile.NewScanner(shpFile, dbfFile, shapefile.FilterFields(*fields...))
+	}
 	return dataTable(s, fields)
 }
 
