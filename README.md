@@ -1,6 +1,8 @@
 # go-shapefile
 
-`go-shapefile` is a Go parser for the "shapefile" GIS file format. The package does not currently support writing of files.
+`go-shapefile` is a Go parser for the "shapefile" GIS file format. The package can be used to read shapefiles, and optionally convert them into GeoJSON "features" (supported by [`go-geojson`](https://github.com/mercatormaps/go-geojson)) - allowing a shapefile to be written directly to databases such as PostGIS, MongoDB, or Couchbase, etc.
+
+**The package does not currently support writing of files.**
 
 ## Usage
 
@@ -42,6 +44,18 @@ for {
 
 // Err() returns the first error encountered during calls to Record()
 err = scanner.Err()
+```
+
+### GeoJSON example
+
+Using the example above, we can optionally convert shapefile records to GeoJSON features. `go-shapefile` achieves this by using [`go-geojson`](https://github.com/mercatormaps/go-geojson), meaning that you can use the standard `json.Marshal` to produce a JSON object that can be understood by any software that can work with the GeoJSON standard.
+
+```go
+record := scanner.Record()
+feature := record.GeoJSONFeature()
+
+jsonData, err := json.Marshal(feature)
+fmt.Println(string(jsonData))
 ```
 
 ## Features
