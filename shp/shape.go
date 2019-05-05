@@ -1,5 +1,9 @@
 package shp
 
+import (
+	"github.com/mercatormaps/go-geojson"
+)
+
 // ShapeType represents a shape type in the shp file.
 type ShapeType uint
 
@@ -28,6 +32,7 @@ type Shape interface {
 	Type() ShapeType
 	RecordNumber() uint32
 	Validate(*Validator) error
+	GeoJSONFeature() *geojson.Feature
 }
 
 func validShapeType(u uint32) bool {
