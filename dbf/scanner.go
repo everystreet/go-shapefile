@@ -146,7 +146,7 @@ func (s *Scanner) Err() error {
 	return s.err
 }
 
-func (s *Scanner) decodeRecord(buf []byte, conf *Config) {
+func (s *Scanner) decodeRecord(buf []byte, conf *config) {
 	switch s.version {
 	case DBaseLevel5:
 		rec, err := dbase5.DecodeRecord(buf, s.header.(*dbase5.Header), conf)

@@ -1,20 +1,20 @@
 package shp
 
 // Option funcs can be passed to NewScanner().
-type Option func(*Config)
+type Option func(*config)
 
 // PointPrecision sets the precision of coordinates.
 func PointPrecision(p uint) Option {
-	return func(c *Config) {
+	return func(c *config) {
 		c.precision = &p
 	}
 }
 
 // Config for shp parsing.
-type Config struct {
+type config struct {
 	precision *uint
 }
 
-func defaultConfig() *Config {
-	return &Config{}
+func defaultConfig() *config {
+	return &config{}
 }

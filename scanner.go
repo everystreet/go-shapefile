@@ -14,7 +14,7 @@ import (
 type Scanner struct {
 	shp  *shp.Scanner
 	dbf  *dbf.Scanner
-	opts Options
+	opts options
 
 	infoOnce sync.Once
 	info     Info

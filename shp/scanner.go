@@ -116,7 +116,7 @@ func (s *Scanner) Err() error {
 	return s.err
 }
 
-func (s *Scanner) decodeRecord(rec *record, conf *Config) {
+func (s *Scanner) decodeRecord(rec *record, conf *config) {
 	if rec.shapeType == Null {
 		return
 	} else if rec.shapeType != s.header.ShapeType {

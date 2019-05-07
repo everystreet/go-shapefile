@@ -5,12 +5,12 @@ import (
 )
 
 // Option funcs can be passed to Scanner.Scan().
-type Option func(*Config)
+type Option func(*config)
 
 // CharacterEncoding sets the encoding of character field values.
 // By default, ASCII is assumed.
 func CharacterEncoding(enc cpg.CharacterEncoding) Option {
-	return func(c *Config) {
+	return func(c *config) {
 		c.charEnc = enc
 	}
 }
@@ -19,29 +19,29 @@ func CharacterEncoding(enc cpg.CharacterEncoding) Option {
 // If this option is used, only these fields will be returned in the Record.
 // Without this option, all available fields are returned.
 func FilterFields(names ...string) Option {
-	return func(c *Config) {
+	return func(c *config) {
 		c.fields = names
 	}
 }
 
 // Config for dbf parsing.
-type Config struct {
+type config struct {
 	charEnc cpg.CharacterEncoding
 	fields  []string
 }
 
 // CharacterEncoding returns the configured encoding.
-func (c *Config) CharacterEncoding() cpg.CharacterEncoding {
+func (c *config) CharacterEncoding() cpg.CharacterEncoding {
 	return c.charEnc
 }
 
 // FilteredFields returns the configured field names.
-func (c *Config) FilteredFields() []string {
+func (c *config) FilteredFields() []string {
 	return c.fields
 }
 
-func defaultConfig() *Config {
-	return &Config{
+func defaultConfig() *config {
+	return &config{
 		charEnc: cpg.EncodingASCII,
 	}
 }
