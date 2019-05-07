@@ -39,6 +39,9 @@ func NewZipScanner(r io.ReaderAt, size int64, filename string, opts ...Option) (
 
 func (s *ZipScanner) AddOptions(opts ...Option) {
 	s.opts = append(s.opts, opts...)
+	if s.scanner != nil {
+		s.scanner.AddOptions(s.opts...)
+	}
 }
 
 func (s *ZipScanner) Info() (*Info, error) {
