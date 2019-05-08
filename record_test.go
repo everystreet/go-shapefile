@@ -17,14 +17,31 @@ func TestRecordToGeoJSON(t *testing.T) {
 			fields: []dbf.Field{
 				&fakeField{"prop1", "value1"},
 				&fakeField{"prop2", 2},
+				&fakeField{"prop3", "value3"},
 			},
 		},
 	}
 
-	require.Equal(t, geojson.NewPoint(0, 0).WithProperties(
-		geojson.Property{Name: "prop1", Value: "value1"},
-		geojson.Property{Name: "prop2", Value: 2},
-	), rec.GeoJSONFeature())
+	t.Run("simple", func(t *testing.T) {
+		require.Equal(t, geojson.NewPoint(0, 0).WithProperties(
+			geojson.Property{Name: "prop1", Value: "value1"},
+			geojson.Property{Name: "prop2", Value: 2},
+			geojson.Property{Name: "prop3", Value: "value3"},
+		), rec.GeoJSONFeature())
+	})
+
+	t.Run("renamed properties", func(t *testing.T) {
+		require.Equal(t, geojson.NewPoint(0, 0).WithProperties(
+			geojson.Property{Name: "new-prop-name", Value: "value1"},
+			geojson.Property{Name: "new-prop-name", Value: 2},
+			geojson.Property{Name: "prop3", Value: "value3"},
+		), rec.GeoJSONFeature(
+			shapefile.RenameProperties(map[string]string{
+				"prop1": "new-prop-name",
+				"prop2": "new-prop-name",
+			}),
+		))
+	})
 }
 
 type fakeAttrs struct {
