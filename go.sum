@@ -8,6 +8,8 @@ github.com/davecgh/go-spew v1.1.1 h1:vj9j/u1bqnvCEfJOwUhtlOARqs3+rkHYY13jYWTU97c
 github.com/davecgh/go-spew v1.1.1/go.mod h1:J7Y8YcW2NihsgmVo/mv3lAwl/skON4iLHjSsI+c5H38=
 github.com/golang/geo v0.0.0-20181008215305-476085157cff h1:JkeTBbgV6+IWNqy4SR8MV4mj2scYNCEgSvkPJjmh8Cs=
 github.com/golang/geo v0.0.0-20181008215305-476085157cff/go.mod h1:vgWZ7cu0fq0KY3PpEHsocXOWJpRtkcbKemU4IUw0M60=
+github.com/golang/geo v0.0.0-20190507233405-a0e886e97a51 h1:MQn73MfXCNoQbk2UxlMcU7HMSiOipZ9KL97Lx+/5e/k=
+github.com/golang/geo v0.0.0-20190507233405-a0e886e97a51/go.mod h1:QZ0nwyI2jOfgRAoBvP+ab5aRr7c9x7lhGEJrKvBwjWI=
 github.com/mattn/go-runewidth v0.0.4 h1:2BvfKmzob6Bmd4YsL0zygOqfdFnK7GR4QL06Do4/p7Y=
 github.com/mattn/go-runewidth v0.0.4/go.mod h1:LwmH8dsx7+W8Uxz3IHJYH5QSwggIsqBzpuz5H//U1FU=
 github.com/mercatormaps/go-geojson v0.0.0-20190504173311-c9ab53fd8d4f h1:/tLraNmm+QWe7YioNomON2QaPSfEEqOEg6OsQV8uQtk=
