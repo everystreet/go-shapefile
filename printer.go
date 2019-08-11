@@ -3,6 +3,8 @@ package shapefile
 import (
 	"fmt"
 	"os"
+	"strings"
+	"text/tabwriter"
 
 	"github.com/olekukonko/tablewriter"
 )
@@ -44,6 +46,24 @@ func (p *TablePrinter) Print() error {
 		return err
 	}
 
+	w := tabwriter.NewWriter(os.Stdout, 0, 0, 1, ' ', 0)
+	for {
+		rec := p.scanner.Record()
+		if rec == nil {
+			break
+		}
+
+		row := p.row(rec)
+		fmt.Fprintln(w, strings.Join(row, "\t"))
+	}
+	return w.Flush()
+}
+
+func (p *TablePrinter) PrettyPrint() error {
+	if err := p.scanner.Scan(); err != nil {
+		return err
+	}
+
 	table := tablewriter.NewWriter(os.Stdout)
 	table.SetAutoWrapText(false)
 	headers := []string{"Number"}
@@ -54,15 +74,7 @@ func (p *TablePrinter) Print() error {
 		if rec == nil {
 			break
 		}
-
-		row := make([]string, len(p.fields)+1)
-		row[0] = fmt.Sprintf("%d", rec.Shape.RecordNumber())
-		for i, name := range p.fields {
-			if f, ok := rec.Attributes.Field(name); ok {
-				row[i+1] = fmt.Sprintf("%v", f.Value())
-			}
-		}
-		table.Append(row)
+		table.Append(p.row(rec))
 	}
 
 	if err := p.scanner.Err(); err != nil {
@@ -71,4 +83,15 @@ func (p *TablePrinter) Print() error {
 
 	table.Render()
 	return nil
+}
+
+func (p *TablePrinter) row(rec *Record) []string {
+	row := make([]string, len(p.fields)+1)
+	row[0] = fmt.Sprintf("%d", rec.Shape.RecordNumber())
+	for i, name := range p.fields {
+		if f, ok := rec.Attributes.Field(name); ok {
+			row[i+1] = fmt.Sprintf("%v", f.Value())
+		}
+	}
+	return row
 }

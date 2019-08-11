@@ -4,6 +4,8 @@ import (
 	"fmt"
 	"os"
 	"path/filepath"
+	"strings"
+	"text/tabwriter"
 
 	"github.com/mercatormaps/go-shapefile"
 	"github.com/mercatormaps/go-shapefile/dbf"
@@ -23,6 +25,7 @@ func main() {
 		"Attribute file (.dbf) path. Must be used in combination with --shp.").Short('d').String()
 	readFields := readCommand.Flag("fields", "Only the specified field names.").Short('f').Strings()
 	readListFields := readCommand.Flag("list-fields", "List fields only - no data.").Bool()
+	pretty := readCommand.Flag("pretty", "Enable pretty-printing.").Short('p').Bool()
 
 	var err error
 	switch kingpin.Parse() {
@@ -33,13 +36,13 @@ func main() {
 		case *readZipPath != "" && (*readShpPath != "" || *readDbfPath != ""):
 			err = fmt.Errorf("--zip cannot be used with --shp or --dbf")
 		case *readZipPath != "":
-			err = dataFromZip(*readZipPath, readFields, *readListFields)
+			err = dataFromZip(*readZipPath, readFields, *readListFields, *pretty)
 		case *readListFields == false && (*readShpPath == "" || *readDbfPath == ""):
 			err = fmt.Errorf("--shp and --dbf must be used together")
 		case *readListFields == true && *readDbfPath != "":
-			err = fieldsFromExtracted(*readDbfPath)
+			err = fieldsFromExtracted(*readDbfPath, *pretty)
 		case *readShpPath != "" && *readDbfPath != "":
-			err = dataFromExtracted(*readShpPath, *readDbfPath, readFields)
+			err = dataFromExtracted(*readShpPath, *readDbfPath, readFields, *pretty)
 		default:
 			err = fmt.Errorf("unspecified source")
 		}
@@ -53,7 +56,7 @@ func main() {
 	}
 }
 
-func dataFromZip(path string, fields *[]string, meta bool) error {
+func dataFromZip(path string, fields *[]string, meta, pretty bool) error {
 	f, err := os.Open(path)
 	if err != nil {
 		return errors.Wrapf(err, "failed to open zip file '%s'", path)
@@ -83,12 +86,16 @@ func dataFromZip(path string, fields *[]string, meta bool) error {
 		if err != nil {
 			return err
 		}
+
+		if pretty {
+			return fieldsPrettyTable(info.Fields)
+		}
 		return fieldsTable(info.Fields)
 	}
-	return dataTable(s, fields)
+	return dataTable(s, fields, pretty)
 }
 
-func dataFromExtracted(shpPath, dbfPath string, fields *[]string) error {
+func dataFromExtracted(shpPath, dbfPath string, fields *[]string, pretty bool) error {
 	shpFile, err := os.Open(shpPath)
 	if err != nil {
 		return errors.Wrapf(err, "failed to open shape file '%s'", shpPath)
@@ -107,10 +114,10 @@ func dataFromExtracted(shpPath, dbfPath string, fields *[]string) error {
 	} else {
 		s = shapefile.NewScanner(shpFile, dbfFile, shapefile.FilterFields(*fields...))
 	}
-	return dataTable(s, fields)
+	return dataTable(s, fields, pretty)
 }
 
-func fieldsFromExtracted(dbfPath string) error {
+func fieldsFromExtracted(dbfPath string, pretty bool) error {
 	dbfFile, err := os.Open(dbfPath)
 	if err != nil {
 		return errors.Wrapf(err, "failed to open attributes file '%s'", dbfPath)
@@ -129,13 +136,17 @@ func fieldsFromExtracted(dbfPath string) error {
 		for i, f := range h.Fields {
 			fields[i] = f
 		}
+
+		if pretty {
+			return fieldsPrettyTable(fields)
+		}
 		return fieldsTable(fields)
 	default:
 		return fmt.Errorf("unrecognized file type")
 	}
 }
 
-func dataTable(s shapefile.Scannable, fields *[]string) error {
+func dataTable(s shapefile.Scannable, fields *[]string, pretty bool) error {
 	var p *shapefile.TablePrinter
 	var err error
 	if fields != nil {
@@ -147,41 +158,66 @@ func dataTable(s shapefile.Scannable, fields *[]string) error {
 	if err != nil {
 		return err
 	}
+
+	if pretty {
+		return p.PrettyPrint()
+	}
 	return p.Print()
 }
 
 func fieldsTable(fields shapefile.FieldDescList) error {
+	w := tabwriter.NewWriter(os.Stdout, 0, 0, 1, ' ', 0)
+	for _, field := range fields {
+		f, err := fieldRow(field)
+		if err != nil {
+			return err
+		}
+
+		fmt.Fprintln(w, strings.Join(f, "\t"))
+	}
+	return w.Flush()
+}
+
+func fieldsPrettyTable(fields shapefile.FieldDescList) error {
 	table := tablewriter.NewWriter(os.Stdout)
 	table.SetAutoWrapText(false)
 	table.SetHeader([]string{"Name", "Type"})
 
 	for _, field := range fields {
-		switch f := field.(type) {
-		case *dbase5.FieldDesc:
-			typ := ""
-			switch f.Type {
-			case dbase5.CharacterType:
-				typ = "Character"
-			case dbase5.DateType:
-				typ = "Date"
-			case dbase5.FloatingPointType:
-				typ = "Float"
-			case dbase5.LogicalType:
-				typ = "Logical"
-			case dbase5.MemoType:
-				typ = "Memo"
-			case dbase5.NumericType:
-				typ = "Numeric"
-			default:
-				typ = fmt.Sprintf("%c", f.Type)
-			}
-
-			table.Append([]string{field.Name(), typ})
-		default:
-			return fmt.Errorf("unrecognized file type")
+		f, err := fieldRow(field)
+		if err != nil {
+			return err
 		}
+		table.Append(f)
 	}
 
 	table.Render()
 	return nil
+}
+
+func fieldRow(field shapefile.FieldDesc) ([]string, error) {
+	switch f := field.(type) {
+	case *dbase5.FieldDesc:
+		typ := ""
+		switch f.Type {
+		case dbase5.CharacterType:
+			typ = "Character"
+		case dbase5.DateType:
+			typ = "Date"
+		case dbase5.FloatingPointType:
+			typ = "Float"
+		case dbase5.LogicalType:
+			typ = "Logical"
+		case dbase5.MemoType:
+			typ = "Memo"
+		case dbase5.NumericType:
+			typ = "Numeric"
+		default:
+			typ = fmt.Sprintf("%c", f.Type)
+		}
+
+		return []string{field.Name(), typ}, nil
+	default:
+		return nil, fmt.Errorf("unrecognized file type")
+	}
 }
