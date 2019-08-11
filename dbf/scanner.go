@@ -116,7 +116,9 @@ func (s *Scanner) Scan(opts ...Option) error {
 			}
 
 			buf := make([]byte, 1)
-			if n, err := io.ReadFull(s.in, buf); err != nil {
+			if n, err := io.ReadFull(s.in, buf); err == io.EOF {
+				return
+			} else if err != nil {
 				s.setErr(errors.Wrapf(err, "read %d bytes but expecting %d", n, len(buf)))
 				return
 			}
