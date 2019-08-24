@@ -66,6 +66,8 @@ func DecodeRecord(buf []byte, header *Header, conf Config) (*Record, error) {
 		switch desc.Type {
 		case CharacterType:
 			f, err = field.DecodeCharacter(buf[start:end], desc.name, conf.CharacterEncoding())
+		case FloatingPointType:
+			f, err = field.DecodeFloatingPoint(buf[start:end], desc.name)
 		case NumericType:
 			f, err = field.DecodeNumeric(buf[start:end], desc.name)
 		default:
