@@ -47,13 +47,23 @@ func (p *TablePrinter) Print() error {
 	}
 
 	w := tabwriter.NewWriter(os.Stdout, 0, 0, 1, ' ', 0)
+
+	header, err := p.header()
+	if err != nil {
+		return err
+	}
+	fmt.Fprintln(w, strings.Join(header, "\t"))
+
 	for {
 		rec := p.scanner.Record()
 		if rec == nil {
 			break
 		}
 
-		row := p.row(rec)
+		row, err := p.row(rec)
+		if err != nil {
+			return err
+		}
 		fmt.Fprintln(w, strings.Join(row, "\t"))
 	}
 
@@ -71,15 +81,24 @@ func (p *TablePrinter) PrettyPrint() error {
 
 	table := tablewriter.NewWriter(os.Stdout)
 	table.SetAutoWrapText(false)
-	headers := []string{"Number"}
-	table.SetHeader(append(headers, p.fields...))
+
+	header, err := p.header()
+	if err != nil {
+		return err
+	}
+	table.SetHeader(header)
 
 	for {
 		rec := p.scanner.Record()
 		if rec == nil {
 			break
 		}
-		table.Append(p.row(rec))
+
+		row, err := p.row(rec)
+		if err != nil {
+			return err
+		}
+		table.Append(row)
 	}
 
 	if err := p.scanner.Err(); err != nil {
@@ -90,13 +109,49 @@ func (p *TablePrinter) PrettyPrint() error {
 	return nil
 }
 
-func (p *TablePrinter) row(rec *Record) []string {
-	row := make([]string, len(p.fields)+1)
-	row[0] = fmt.Sprintf("%d", rec.Shape.RecordNumber())
+func (p *TablePrinter) header() ([]string, error) {
+	info, err := p.scanner.Info()
+	if err != nil {
+		return nil, err
+	}
+
+	header := []string{"Number"}
+	if len(p.fields) == 0 {
+		for _, f := range info.Fields {
+			header = append(header, f.Name())
+		}
+	} else {
+		header = append(header, p.fields...)
+	}
+	return header, nil
+}
+
+func (p *TablePrinter) row(rec *Record) ([]string, error) {
+	row := []string{fmt.Sprintf("%d", rec.Shape.RecordNumber())}
+
+	// Add all fields if none specified
+	if len(p.fields) == 0 {
+		info, err := p.scanner.Info()
+		if err != nil {
+			return nil, err
+		}
+
+		row = append(row, make([]string, len(info.Fields))...)
+		for i, field := range info.Fields {
+			if f, ok := rec.Attributes.Field(field.Name()); ok {
+				row[i+1] = fmt.Sprintf("%v", f.Value())
+			}
+		}
+		return row, nil
+	}
+
+	// ...or just the specified fields
 	for i, name := range p.fields {
+		row = append(row, make([]string, len(p.fields))...)
+
 		if f, ok := rec.Attributes.Field(name); ok {
 			row[i+1] = fmt.Sprintf("%v", f.Value())
 		}
 	}
-	return row
+	return row, nil
 }
