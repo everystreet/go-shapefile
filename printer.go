@@ -56,6 +56,11 @@ func (p *TablePrinter) Print() error {
 		row := p.row(rec)
 		fmt.Fprintln(w, strings.Join(row, "\t"))
 	}
+
+	if err := p.scanner.Err(); err != nil {
+		return err
+	}
+
 	return w.Flush()
 }
 
