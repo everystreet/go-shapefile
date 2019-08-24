@@ -95,7 +95,7 @@ This file uses a format called "dBase", of which there are several variations in
 | Character/string | :heavy_check_mark: |
 | Numeric          | :heavy_check_mark: |
 | Date             | :x:                |
-| Floating point   | :x:                |
+| Floating point   | :heavy_check_mark: |
 | Logical          | :x:                |
 | Memo             | :x:                |
 
