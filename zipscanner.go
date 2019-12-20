@@ -6,8 +6,6 @@ import (
 	"io"
 	"strings"
 	"sync"
-
-	"github.com/pkg/errors"
 )
 
 // ZipScanner wraps Scanner, providing a simple method of reading a zipped shapefile.
@@ -96,13 +94,13 @@ func (s *ZipScanner) init() error {
 		var shpR, dbfR io.ReadCloser
 		shpR, err = shpFile.Open()
 		if err != nil {
-			err = errors.Wrapf(err, "failed to open %s", shpFile.Name)
+			err = fmt.Errorf("failed to open %s: %w", shpFile.Name, err)
 			return
 		}
 
 		dbfR, err = dbfFile.Open()
 		if err != nil {
-			err = errors.Wrapf(err, "failed to open %s", dbfFile.Name)
+			err = fmt.Errorf("failed to open %s: %w", dbfFile.Name, err)
 			return
 		}
 

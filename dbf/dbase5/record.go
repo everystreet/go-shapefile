@@ -5,7 +5,6 @@ import (
 
 	"github.com/everystreet/go-shapefile/cpg"
 	"github.com/everystreet/go-shapefile/dbf/field"
-	"github.com/pkg/errors"
 )
 
 // Record represents a single record, primarly consisting of a set of fields.
@@ -49,8 +48,8 @@ func DecodeRecord(buf []byte, header *Header, conf Config) (*Record, error) {
 	pos := 1
 	for i, desc := range header.Fields {
 		if len(buf) < (pos + int(desc.len)) {
-			return nil, errors.Wrapf(fmt.Errorf("expecting %d bytes but have %d", desc.len, len(buf)-pos),
-				fieldDecodeErr, desc.name, i)
+			return nil, fmt.Errorf(fieldDecodeErr, desc.name, i,
+				fmt.Errorf("expecting %d bytes but have %d", desc.len, len(buf)-pos))
 		}
 		start, end := pos, pos+int(desc.len)
 		pos += int(desc.len)
@@ -71,12 +70,12 @@ func DecodeRecord(buf []byte, header *Header, conf Config) (*Record, error) {
 		case NumericType:
 			f, err = field.DecodeNumeric(buf[start:end], desc.name)
 		default:
-			return nil, errors.Wrapf(fmt.Errorf("unsupported field type '%c'", desc.Type),
-				fieldDecodeErr, desc.name, i)
+			return nil, fmt.Errorf(fieldDecodeErr, desc.name, i,
+				fmt.Errorf("unsupported field type '%c'", desc.Type))
 		}
 
 		if err != nil {
-			return nil, errors.Wrapf(err, fieldDecodeErr, desc.name, i)
+			return nil, fmt.Errorf(fieldDecodeErr, desc.name, i, err)
 		}
 		rec.Fields[f.Name()] = f
 	}
@@ -102,4 +101,4 @@ func wantField(name string, filtered []string) bool {
 	return false
 }
 
-const fieldDecodeErr = "failed to decode field '%s' (%d)"
+const fieldDecodeErr = "failed to decode field '%s' (%d): %w"

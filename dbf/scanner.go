@@ -6,7 +6,6 @@ import (
 	"sync"
 
 	"github.com/everystreet/go-shapefile/dbf/dbase5"
-	"github.com/pkg/errors"
 )
 
 // Version is the dBase version or "level".
@@ -58,7 +57,7 @@ func (s *Scanner) Version() (Version, error) {
 		buf := make([]byte, 1)
 		var n int
 		if n, err = io.ReadFull(s.in, buf); err != nil {
-			err = errors.Wrapf(err, "read %d bytes but expecting %d", n, len(buf))
+			err = fmt.Errorf("read %d bytes but expecting %d: %w", n, len(buf), err)
 			return
 		}
 
@@ -73,7 +72,7 @@ func (s *Scanner) Version() (Version, error) {
 func (s *Scanner) Header() (Header, error) {
 	var err error
 	if _, err = s.Version(); err != nil {
-		return nil, errors.Wrap(err, "failed to parse version number")
+		return nil, fmt.Errorf("failed to parse version number: %w", err)
 	}
 
 	s.headerOnce.Do(func() {
@@ -99,7 +98,7 @@ func (s *Scanner) Scan(opts ...Option) error {
 	}
 
 	if _, err := s.Header(); err != nil {
-		return errors.Wrap(err, "failed to parse header")
+		return fmt.Errorf("failed to parse header: %w", err)
 	}
 
 	s.scanOnce.Do(func() {
@@ -119,7 +118,7 @@ func (s *Scanner) Scan(opts ...Option) error {
 			if n, err := io.ReadFull(s.in, buf); err == io.EOF {
 				return
 			} else if err != nil {
-				s.setErr(errors.Wrapf(err, "read %d bytes but expecting %d", n, len(buf)))
+				s.setErr(fmt.Errorf("read %d bytes but expecting %d: %w", n, len(buf), err))
 				return
 			}
 
@@ -170,7 +169,7 @@ func (s *Scanner) decodeRecord(buf []byte, conf *config) {
 func (s *Scanner) record() ([]byte, error) {
 	buf := make([]byte, s.header.RecordLen())
 	if n, err := io.ReadFull(s.in, buf); err != nil {
-		return nil, NewError(errors.Wrapf(err, "read %d bytes but expecting %d", n, len(buf)), s.num)
+		return nil, NewError(fmt.Errorf("read %d bytes but expecting %d: %w", n, len(buf), err), s.num)
 	}
 	return buf, nil
 }

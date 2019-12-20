@@ -11,7 +11,6 @@ import (
 	"github.com/everystreet/go-shapefile/dbf"
 	"github.com/everystreet/go-shapefile/dbf/dbase5"
 	"github.com/olekukonko/tablewriter"
-	"github.com/pkg/errors"
 	"gopkg.in/alecthomas/kingpin.v2"
 )
 
@@ -59,13 +58,13 @@ func main() {
 func dataFromZip(path string, fields *[]string, meta, pretty bool) error {
 	f, err := os.Open(path)
 	if err != nil {
-		return errors.Wrapf(err, "failed to open zip file '%s'", path)
+		return fmt.Errorf("failed to open zip file '%s': %w", path, err)
 	}
 	defer f.Close()
 
 	stat, err := f.Stat()
 	if err != nil {
-		return errors.Wrapf(err, "failed to stat zip file '%s'", path)
+		return fmt.Errorf("failed to stat zip file '%s': %w", path, err)
 	}
 
 	_, name := filepath.Split(path)
@@ -98,13 +97,13 @@ func dataFromZip(path string, fields *[]string, meta, pretty bool) error {
 func dataFromExtracted(shpPath, dbfPath string, fields *[]string, pretty bool) error {
 	shpFile, err := os.Open(shpPath)
 	if err != nil {
-		return errors.Wrapf(err, "failed to open shape file '%s'", shpPath)
+		return fmt.Errorf("failed to open shape file '%s': %w", shpPath, err)
 	}
 	defer shpFile.Close()
 
 	dbfFile, err := os.Open(dbfPath)
 	if err != nil {
-		return errors.Wrapf(err, "failed to open attributes file '%s'", dbfPath)
+		return fmt.Errorf("failed to open attributes file '%s': %w", dbfPath, err)
 	}
 	defer dbfFile.Close()
 
@@ -120,14 +119,14 @@ func dataFromExtracted(shpPath, dbfPath string, fields *[]string, pretty bool) e
 func fieldsFromExtracted(dbfPath string, pretty bool) error {
 	dbfFile, err := os.Open(dbfPath)
 	if err != nil {
-		return errors.Wrapf(err, "failed to open attributes file '%s'", dbfPath)
+		return fmt.Errorf("failed to open attributes file '%s': %w", dbfPath, err)
 	}
 	defer dbfFile.Close()
 
 	s := dbf.NewScanner(dbfFile)
 	header, err := s.Header()
 	if err != nil {
-		return errors.Wrap(err, "failed to parse dbf header")
+		return fmt.Errorf("failed to parse dbf header: %w", err)
 	}
 
 	switch h := header.(type) {

@@ -2,9 +2,8 @@ package field
 
 import (
 	"bytes"
+	"fmt"
 	"strconv"
-
-	"github.com/pkg/errors"
 )
 
 // Numeric field.
@@ -18,7 +17,7 @@ func DecodeNumeric(buf []byte, name string) (*Numeric, error) {
 	val := bytes.Trim(buf, "\x20") // trim spaces
 	num, err := strconv.ParseFloat(string(val), 0)
 	if err != nil {
-		return nil, errors.Wrapf(err, "failed to parse number '%s'", string(val))
+		return nil, fmt.Errorf("failed to parse number '%s': %w", string(val), err)
 	}
 
 	return &Numeric{

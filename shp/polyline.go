@@ -3,8 +3,6 @@ package shp
 import (
 	"encoding/binary"
 	"fmt"
-
-	"github.com/pkg/errors"
 )
 
 // Polyline is an ordered set of verticies that consists of one or more parts, where a part is one or more Point.
@@ -131,7 +129,7 @@ func decodePolyline(buf []byte, num uint32, precision *uint) (*Polyline, error) 
 			x := int(start) + j
 			p, err := point(buf[pointsOffset+(x*16):pointsOffset+(x*16)+16], num)
 			if err != nil {
-				return nil, errors.Wrap(err, "failed to decode point")
+				return nil, fmt.Errorf("failed to decode point: %w", err)
 			}
 			p.box = box
 			out.Parts[i][j] = *p

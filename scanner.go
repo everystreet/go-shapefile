@@ -8,7 +8,6 @@ import (
 	"github.com/everystreet/go-shapefile/dbf"
 	"github.com/everystreet/go-shapefile/dbf/dbase5"
 	"github.com/everystreet/go-shapefile/shp"
-	"github.com/pkg/errors"
 )
 
 // Scanner parses a pair or shp and dbf files.
@@ -82,13 +81,13 @@ func (s *Scanner) Info() (*Info, error) {
 	s.infoOnce.Do(func() {
 		var shpHeader *shp.Header
 		if shpHeader, err = s.shp.Header(); err != nil {
-			err = errors.Wrap(err, "failed to parse shp header")
+			err = fmt.Errorf("failed to parse shp header: %w", err)
 			return
 		}
 
 		var dbfHeader dbf.Header
 		if dbfHeader, err = s.dbf.Header(); err != nil {
-			err = errors.Wrap(err, "failed to parse dbf header")
+			err = fmt.Errorf("failed to parse dbf header: %w", err)
 			return
 		}
 
@@ -134,9 +133,9 @@ func (s *Scanner) Scan() error {
 		go func() {
 			defer func() {
 				if err := s.shp.Err(); err != nil {
-					s.setErr(errors.Wrap(err, "error in shp file"))
+					s.setErr(fmt.Errorf("error in shp file: %w", err))
 				} else if err = s.dbf.Err(); err != nil {
-					s.setErr(errors.Wrap(err, "error in dbf file"))
+					s.setErr(fmt.Errorf("error in dbf file: %w", err))
 				}
 
 				close(s.recordsCh)
@@ -145,7 +144,7 @@ func (s *Scanner) Scan() error {
 			for i := uint32(0); i < info.NumRecords; i++ {
 				shape := s.shp.Shape()
 				if err := s.shp.Err(); err != nil {
-					s.setErr(errors.Wrap(err, "error in shp file"))
+					s.setErr(fmt.Errorf("error in shp file: %w", err))
 					return
 				} else if shape == nil {
 					s.setErr(fmt.Errorf("failed to read shape; expecting %d but have read %d", info.NumRecords, i+1))
@@ -154,7 +153,7 @@ func (s *Scanner) Scan() error {
 
 				attr := s.dbf.Record()
 				if err = s.dbf.Err(); err != nil {
-					s.setErr(errors.Wrap(err, "error in dbf file"))
+					s.setErr(fmt.Errorf("error in dbf file: %w", err))
 					return
 				} else if attr == nil {
 					s.setErr(fmt.Errorf("failed to read attributes; expecting %d but have read %d", info.NumRecords, i+1))

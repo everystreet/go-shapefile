@@ -8,7 +8,6 @@ require (
 	github.com/everystreet/go-geojson/v2 v2.0.1
 	github.com/golang/geo v0.0.0-20190916061304-5b978397cfec
 	github.com/olekukonko/tablewriter v0.0.4
-	github.com/pkg/errors v0.8.1
 	github.com/stretchr/testify v1.4.0
 	gopkg.in/alecthomas/kingpin.v2 v2.2.6
 )

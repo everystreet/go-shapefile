@@ -5,8 +5,6 @@ import (
 	"fmt"
 	"io"
 	"sync"
-
-	"github.com/pkg/errors"
 )
 
 // Scanner parses a shp file.
@@ -45,7 +43,7 @@ func (s *Scanner) Header() (*Header, error) {
 		buf := make([]byte, 100)
 		var n int
 		if n, err = io.ReadFull(s.in, buf); err != nil {
-			err = errors.Wrapf(err, "expecting to read %d bytes but only read %d", len(buf), n)
+			err = fmt.Errorf("expecting to read %d bytes but only read %d: %w", len(buf), n, err)
 			return
 		}
 
@@ -62,7 +60,7 @@ func (s *Scanner) Header() (*Header, error) {
 func (s *Scanner) Validator() (*Validator, error) {
 	h, err := s.Header()
 	if err != nil {
-		return nil, errors.Wrap(err, "failed to decode header")
+		return nil, fmt.Errorf("failed to decode header: %w", err)
 	}
 	return NewValidator(&h.BoundingBox)
 }
@@ -77,7 +75,7 @@ func (s *Scanner) Scan() error {
 	}
 
 	if _, err := s.Header(); err != nil {
-		return errors.Wrap(err, "failed to parse header")
+		return fmt.Errorf("failed to parse header: %w", err)
 	}
 
 	s.scanOnce.Do(func() {
