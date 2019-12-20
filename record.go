@@ -1,9 +1,9 @@
 package shapefile
 
 import (
-	"github.com/mercatormaps/go-geojson"
-	"github.com/mercatormaps/go-shapefile/dbf"
-	"github.com/mercatormaps/go-shapefile/shp"
+	"github.com/everystreet/go-geojson/v2"
+	"github.com/everystreet/go-shapefile/dbf"
+	"github.com/everystreet/go-shapefile/shp"
 )
 
 // Record consists of a shape (read from the .shp file) and attributes (from the .dbf file).

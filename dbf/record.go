@@ -1,6 +1,8 @@
 package dbf
 
-import "github.com/mercatormaps/go-shapefile/dbf/dbase5"
+import (
+	"github.com/everystreet/go-shapefile/dbf/dbase5"
+)
 
 // Record wraps a dBase level-specific record.
 type Record struct {

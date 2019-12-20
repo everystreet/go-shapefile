@@ -3,8 +3,8 @@ package dbase5
 import (
 	"fmt"
 
-	"github.com/mercatormaps/go-shapefile/cpg"
-	"github.com/mercatormaps/go-shapefile/dbf/field"
+	"github.com/everystreet/go-shapefile/cpg"
+	"github.com/everystreet/go-shapefile/dbf/field"
 	"github.com/pkg/errors"
 )
 

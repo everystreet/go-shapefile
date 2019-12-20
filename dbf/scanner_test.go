@@ -5,8 +5,8 @@ import (
 	"path/filepath"
 	"testing"
 
-	"github.com/mercatormaps/go-shapefile/dbf"
-	"github.com/mercatormaps/go-shapefile/dbf/dbase5"
+	"github.com/everystreet/go-shapefile/dbf"
+	"github.com/everystreet/go-shapefile/dbf/dbase5"
 	"github.com/stretchr/testify/require"
 )
 

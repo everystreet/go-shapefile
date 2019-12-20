@@ -5,7 +5,7 @@ import (
 	"fmt"
 	"strings"
 
-	"github.com/mercatormaps/go-shapefile/cpg"
+	"github.com/everystreet/go-shapefile/cpg"
 )
 
 // Character field is a string of characters.

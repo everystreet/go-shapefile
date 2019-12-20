@@ -5,7 +5,7 @@ import (
 	"io"
 	"sync"
 
-	"github.com/mercatormaps/go-shapefile/dbf/dbase5"
+	"github.com/everystreet/go-shapefile/dbf/dbase5"
 	"github.com/pkg/errors"
 )
 

@@ -1,7 +1,7 @@
 package shp
 
 import (
-	"github.com/mercatormaps/go-geojson"
+	"github.com/everystreet/go-geojson/v2"
 )
 
 // GeoJSONFeature creates a GeoJSON Point from a Shapefile Point.
@@ -26,10 +26,7 @@ func sliceOfPositionSlices(parts []Part) [][]geojson.Position {
 	for i, part := range parts {
 		strings[i] = make([]geojson.Position, len(part))
 		for j, point := range part {
-			strings[i][j] = geojson.Position{
-				Longitude: point.X,
-				Latitude:  point.Y,
-			}
+			strings[i][j] = geojson.MakePosition(point.Y, point.X)
 		}
 	}
 	return strings
@@ -37,7 +34,7 @@ func sliceOfPositionSlices(parts []Part) [][]geojson.Position {
 
 func withBox(b *BoundingBox, f *geojson.Feature) *geojson.Feature {
 	return f.WithBoundingBox(
-		geojson.NewPosition(b.MinX, b.MinY),
-		geojson.NewPosition(b.MaxX, b.MaxY),
+		geojson.MakePosition(b.MinY, b.MinX),
+		geojson.MakePosition(b.MaxY, b.MaxX),
 	)
 }

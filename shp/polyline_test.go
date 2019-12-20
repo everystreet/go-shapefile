@@ -4,7 +4,7 @@ import (
 	"encoding/hex"
 	"testing"
 
-	"github.com/mercatormaps/go-shapefile/shp"
+	"github.com/everystreet/go-shapefile/shp"
 	"github.com/stretchr/testify/require"
 )
 

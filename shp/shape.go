@@ -1,7 +1,7 @@
 package shp
 
 import (
-	"github.com/mercatormaps/go-geojson"
+	"github.com/everystreet/go-geojson/v2"
 )
 
 // ShapeType represents a shape type in the shp file.

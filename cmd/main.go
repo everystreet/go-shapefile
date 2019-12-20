@@ -7,9 +7,9 @@ import (
 	"strings"
 	"text/tabwriter"
 
-	"github.com/mercatormaps/go-shapefile"
-	"github.com/mercatormaps/go-shapefile/dbf"
-	"github.com/mercatormaps/go-shapefile/dbf/dbase5"
+	"github.com/everystreet/go-shapefile"
+	"github.com/everystreet/go-shapefile/dbf"
+	"github.com/everystreet/go-shapefile/dbf/dbase5"
 	"github.com/olekukonko/tablewriter"
 	"github.com/pkg/errors"
 	"gopkg.in/alecthomas/kingpin.v2"

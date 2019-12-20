@@ -1,7 +1,7 @@
 package dbf
 
 import (
-	"github.com/mercatormaps/go-shapefile/cpg"
+	"github.com/everystreet/go-shapefile/cpg"
 )
 
 // Option funcs can be passed to Scanner.Scan().

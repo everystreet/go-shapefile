@@ -5,7 +5,7 @@ import (
 	"path/filepath"
 	"testing"
 
-	"github.com/mercatormaps/go-shapefile"
+	"github.com/everystreet/go-shapefile"
 	"github.com/stretchr/testify/require"
 )
 

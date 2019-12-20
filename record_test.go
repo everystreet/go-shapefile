@@ -3,10 +3,10 @@ package shapefile_test
 import (
 	"testing"
 
-	"github.com/mercatormaps/go-geojson"
-	"github.com/mercatormaps/go-shapefile"
-	"github.com/mercatormaps/go-shapefile/dbf"
-	"github.com/mercatormaps/go-shapefile/shp"
+	"github.com/everystreet/go-geojson/v2"
+	"github.com/everystreet/go-shapefile"
+	"github.com/everystreet/go-shapefile/dbf"
+	"github.com/everystreet/go-shapefile/shp"
 	"github.com/stretchr/testify/require"
 )
 

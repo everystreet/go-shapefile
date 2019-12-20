@@ -3,8 +3,8 @@ package shp_test
 import (
 	"testing"
 
-	"github.com/mercatormaps/go-geojson"
-	"github.com/mercatormaps/go-shapefile/shp"
+	"github.com/everystreet/go-geojson/v2"
+	"github.com/everystreet/go-shapefile/shp"
 	"github.com/stretchr/testify/require"
 )
 
@@ -32,12 +32,12 @@ func TestPolylineToGeoJSON(t *testing.T) {
 	require.Equal(t,
 		geojson.NewMultiLineString(
 			[]geojson.Position{
-				geojson.NewPosition(12.34, 56.78),
-				geojson.NewPosition(23.45, 67.89),
+				geojson.MakePosition(56.78, 12.34),
+				geojson.MakePosition(67.89, 23.45),
 			}).
 			WithBoundingBox(
-				geojson.NewPosition(1, 1),
-				geojson.NewPosition(100, 100),
+				geojson.MakePosition(1, 1),
+				geojson.MakePosition(100, 100),
 			),
 		p.GeoJSONFeature())
 }
@@ -61,12 +61,12 @@ func TestPolygonToGeoJSON(t *testing.T) {
 	require.Equal(t,
 		geojson.NewPolygon(
 			[]geojson.Position{
-				geojson.NewPosition(12.34, 56.78),
-				geojson.NewPosition(23.45, 67.89),
+				geojson.MakePosition(56.78, 12.34),
+				geojson.MakePosition(67.89, 23.45),
 			}).
 			WithBoundingBox(
-				geojson.NewPosition(1, 1),
-				geojson.NewPosition(100, 100),
+				geojson.MakePosition(1, 1),
+				geojson.MakePosition(100, 100),
 			),
 		p.GeoJSONFeature())
 }

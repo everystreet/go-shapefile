@@ -4,7 +4,7 @@ import (
 	"bytes"
 	"testing"
 
-	"github.com/mercatormaps/go-shapefile/cpg"
+	"github.com/everystreet/go-shapefile/cpg"
 	"github.com/stretchr/testify/require"
 )
 

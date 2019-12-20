@@ -5,7 +5,6 @@ import (
 
 	"github.com/golang/geo/r1"
 	"github.com/golang/geo/s1"
-
 	"github.com/golang/geo/s2"
 )
 

@@ -1,9 +1,9 @@
 package shapefile
 
 import (
-	"github.com/mercatormaps/go-shapefile/cpg"
-	"github.com/mercatormaps/go-shapefile/dbf"
-	"github.com/mercatormaps/go-shapefile/shp"
+	"github.com/everystreet/go-shapefile/cpg"
+	"github.com/everystreet/go-shapefile/dbf"
+	"github.com/everystreet/go-shapefile/shp"
 )
 
 // Option funcs can be passed to NewScanner().
