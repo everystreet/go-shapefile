@@ -10,6 +10,7 @@ import (
 	"github.com/pkg/errors"
 )
 
+// ZipScanner wraps Scanner, providing a simple method of reading a zipped shapefile.
 type ZipScanner struct {
 	opts []Option
 
@@ -20,6 +21,9 @@ type ZipScanner struct {
 	scanner  *Scanner
 }
 
+// NewZipScanner creates a ZipScanner for the supplied zip file.
+// The filename parameter should be the zip file's name (as stored on disk),
+// and MUST match the names of the contained shp and dbf files.
 func NewZipScanner(r io.ReaderAt, size int64, filename string, opts ...Option) (*ZipScanner, error) {
 	in, err := zip.NewReader(r, size)
 	if err != nil {
@@ -37,6 +41,7 @@ func NewZipScanner(r io.ReaderAt, size int64, filename string, opts ...Option) (
 	}, nil
 }
 
+// AddOptions allows additional options to be set after the scanner has already been created.
 func (s *ZipScanner) AddOptions(opts ...Option) {
 	s.opts = append(s.opts, opts...)
 	if s.scanner != nil {
@@ -44,6 +49,7 @@ func (s *ZipScanner) AddOptions(opts ...Option) {
 	}
 }
 
+// Info calls Scanner.Info().
 func (s *ZipScanner) Info() (*Info, error) {
 	if err := s.init(); err != nil {
 		return nil, err
@@ -51,6 +57,7 @@ func (s *ZipScanner) Info() (*Info, error) {
 	return s.scanner.Info()
 }
 
+// Scan calls Scanner.Scan().
 func (s *ZipScanner) Scan() error {
 	if err := s.init(); err != nil {
 		return err
@@ -58,6 +65,7 @@ func (s *ZipScanner) Scan() error {
 	return s.scanner.Scan()
 }
 
+// Record calls Scanner.Record().
 func (s *ZipScanner) Record() *Record {
 	if s.scanner == nil {
 		return nil
@@ -65,6 +73,8 @@ func (s *ZipScanner) Record() *Record {
 	return s.scanner.Record()
 }
 
+// Err returns the first error encountered when parsing records.
+// It should be called after calling the Shape method for the last time.
 func (s *ZipScanner) Err() error {
 	if s.scanner == nil {
 		return nil

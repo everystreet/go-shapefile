@@ -2,18 +2,20 @@ package shapefile
 
 import (
 	"fmt"
-	"os"
+	"io"
 	"strings"
 	"text/tabwriter"
 
 	"github.com/olekukonko/tablewriter"
 )
 
+// TablePrinter implements a tabulated view of a shapefile.
 type TablePrinter struct {
 	scanner Scannable
 	fields  []string
 }
 
+// Scannable provides read access to a shapefile.
 type Scannable interface {
 	AddOptions(...Option)
 	Info() (*Info, error)
@@ -22,6 +24,8 @@ type Scannable interface {
 	Err() error
 }
 
+// NewTablePrinter creates a TablePrinter for the supplied shapefile,
+// optionally displaying only the specified field names.
 func NewTablePrinter(s Scannable, fields ...string) (*TablePrinter, error) {
 	info, err := s.Info()
 	if err != nil {
@@ -41,12 +45,13 @@ func NewTablePrinter(s Scannable, fields ...string) (*TablePrinter, error) {
 	}, nil
 }
 
-func (p *TablePrinter) Print() error {
+// Print writes a tab-delimited table to the supplied destination.
+func (p *TablePrinter) Print(out io.Writer) error {
 	if err := p.scanner.Scan(); err != nil {
 		return err
 	}
 
-	w := tabwriter.NewWriter(os.Stdout, 0, 0, 1, ' ', 0)
+	w := tabwriter.NewWriter(out, 0, 0, 1, ' ', 0)
 
 	header, err := p.header()
 	if err != nil {
@@ -74,12 +79,13 @@ func (p *TablePrinter) Print() error {
 	return w.Flush()
 }
 
-func (p *TablePrinter) PrettyPrint() error {
+// PrettyPrint writes a pretty ASCII table to the supplied destination.
+func (p *TablePrinter) PrettyPrint(out io.Writer) error {
 	if err := p.scanner.Scan(); err != nil {
 		return err
 	}
 
-	table := tablewriter.NewWriter(os.Stdout)
+	table := tablewriter.NewWriter(out)
 	table.SetAutoWrapText(false)
 
 	header, err := p.header()

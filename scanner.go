@@ -11,6 +11,7 @@ import (
 	"github.com/pkg/errors"
 )
 
+// Scanner parses a pair or shp and dbf files.
 type Scanner struct {
 	shp  *shp.Scanner
 	dbf  *dbf.Scanner
@@ -26,6 +27,7 @@ type Scanner struct {
 	err     error
 }
 
+// Info contains combined information from the pair of input files.
 type Info struct {
 	BoundingBox shp.BoundingBox
 	NumRecords  uint32
@@ -33,8 +35,10 @@ type Info struct {
 	Fields      FieldDescList
 }
 
+// FieldDescList is a list of field descriptors.
 type FieldDescList []FieldDesc
 
+// Exists reutnrs true if the named field exists, and false otherwise.
 func (l FieldDescList) Exists(name string) bool {
 	for _, f := range l {
 		if f.Name() == name {
@@ -44,10 +48,12 @@ func (l FieldDescList) Exists(name string) bool {
 	return false
 }
 
+// FieldDesc provides information about an attribute field.
 type FieldDesc interface {
 	Name() string
 }
 
+// NewScanner creates a new Scanner for the provided shp and dbf files.
 func NewScanner(shpR, dbfR io.Reader, opts ...Option) *Scanner {
 	s := &Scanner{
 		dbf:       dbf.NewScanner(dbfR),
@@ -61,6 +67,7 @@ func NewScanner(shpR, dbfR io.Reader, opts ...Option) *Scanner {
 	return s
 }
 
+// AddOptions allows additional options to be set after the scanner has already been created.
 func (s *Scanner) AddOptions(opts ...Option) {
 	for _, opt := range opts {
 		opt(&s.opts)
@@ -68,6 +75,7 @@ func (s *Scanner) AddOptions(opts ...Option) {
 	s.shp.AddOptions(s.opts.shp...)
 }
 
+// Info returns combined information about the shp and dbf pair.
 func (s *Scanner) Info() (*Info, error) {
 	var err error
 
@@ -107,6 +115,9 @@ func (s *Scanner) Info() (*Info, error) {
 	return &s.info, err
 }
 
+// Scan begins reading the shp and dbf files for records. Records can be accessed from the Record method.
+// An error is returned if there's a problem parsing the header of either file.
+// Errors that are encountered when parsing records must be checked with the Err method.
 func (s *Scanner) Scan() error {
 	info, err := s.Info()
 	if err != nil {
@@ -161,6 +172,10 @@ func (s *Scanner) Scan() error {
 	return err
 }
 
+// Record returns each record found in the shp and dbf files.
+// A single record consists of a shape and a set of attributes.
+// nil is returned once the last record has been read, or an error occurs -
+// the Err method should be used to check for an error at this point.
 func (s *Scanner) Record() *Record {
 	rec, ok := <-s.recordsCh
 	if !ok {
@@ -169,6 +184,8 @@ func (s *Scanner) Record() *Record {
 	return rec
 }
 
+// Err returns the first error encountered when parsing records.
+// It should be called after calling the Record method for the last time.
 func (s *Scanner) Err() error {
 	return s.err
 }

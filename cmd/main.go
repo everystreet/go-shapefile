@@ -160,9 +160,9 @@ func dataTable(s shapefile.Scannable, fields *[]string, pretty bool) error {
 	}
 
 	if pretty {
-		return p.PrettyPrint()
+		return p.PrettyPrint(os.Stdout)
 	}
-	return p.Print()
+	return p.Print(os.Stdout)
 }
 
 func fieldsTable(fields shapefile.FieldDescList) error {
