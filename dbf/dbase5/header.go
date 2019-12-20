@@ -56,11 +56,11 @@ func DecodeHeader(r io.Reader) (*Header, error) {
 }
 
 // RecordLen returns the size in bytes of each record in the file.
-func (h *Header) RecordLen() uint16 {
+func (h Header) RecordLen() uint16 {
 	return h.recLen
 }
 
 // NumRecords returns the number of records in the file.
-func (h *Header) NumRecords() uint32 {
+func (h Header) NumRecords() uint32 {
 	return h.numRecs
 }

@@ -47,7 +47,7 @@ func (p *Point) Validate(v *Validator) error {
 }
 
 // Validate the Polyline.
-func (p *Polyline) Validate(v *Validator) error {
+func (p Polyline) Validate(v *Validator) error {
 	if len(p.Parts) < 1 {
 		return fmt.Errorf("must contain at least 1 part")
 	}
@@ -70,8 +70,8 @@ func (p *Polyline) Validate(v *Validator) error {
 }
 
 // Validate the Polygon.
-func (p *Polygon) Validate(v *Validator) error {
-	return (*Polyline)(p).Validate(v)
+func (p Polygon) Validate(v *Validator) error {
+	return (Polyline)(p).Validate(v)
 }
 
 func boxToRect(box *BoundingBox) (*s2.Rect, error) {

@@ -3,8 +3,8 @@ package dbase5
 import (
 	"fmt"
 
-	"github.com/everystreet/go-shapefile/cpg"
 	"github.com/everystreet/go-shapefile/dbf/field"
+	"golang.org/x/text/encoding"
 )
 
 // Record represents a single record, primarly consisting of a set of fields.
@@ -22,7 +22,7 @@ type Field interface {
 
 // Config provides config for record parsing.
 type Config interface {
-	CharacterEncoding() cpg.CharacterEncoding
+	CharacterDecoder() *encoding.Decoder
 	FilteredFields() []string
 }
 
@@ -64,7 +64,7 @@ func DecodeRecord(buf []byte, header *Header, conf Config) (*Record, error) {
 
 		switch desc.Type {
 		case CharacterType:
-			f, err = field.DecodeCharacter(buf[start:end], desc.name, conf.CharacterEncoding())
+			f, err = field.DecodeCharacter(buf[start:end], desc.name, conf.CharacterDecoder())
 		case FloatingPointType:
 			f, err = field.DecodeFloatingPoint(buf[start:end], desc.name)
 		case NumericType:
@@ -84,7 +84,7 @@ func DecodeRecord(buf []byte, header *Header, conf Config) (*Record, error) {
 }
 
 // Deleted returns the value of the deleted flag.
-func (r *Record) Deleted() bool {
+func (r Record) Deleted() bool {
 	return r.deleted
 }
 

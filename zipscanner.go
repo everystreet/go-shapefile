@@ -2,10 +2,14 @@ package shapefile
 
 import (
 	"archive/zip"
+	"bufio"
 	"fmt"
 	"io"
 	"strings"
 	"sync"
+
+	"golang.org/x/net/html/charset"
+	"golang.org/x/text/encoding"
 )
 
 // ZipScanner wraps Scanner, providing a simple method of reading a zipped shapefile.
@@ -84,14 +88,13 @@ func (s *ZipScanner) init() error {
 	var err error
 
 	s.initOnce.Do(func() {
-		var shpFile, dbfFile, cfgFile *zip.File
-		shpFile, dbfFile, cfgFile, err = s.files()
+		var shpFile, dbfFile, cpgFile *zip.File
+		shpFile, dbfFile, cpgFile, err = s.files()
 		if err != nil {
 			return
 		}
-		_ = cfgFile
 
-		var shpR, dbfR io.ReadCloser
+		var shpR, dbfR io.Reader
 		shpR, err = shpFile.Open()
 		if err != nil {
 			err = fmt.Errorf("failed to open %s: %w", shpFile.Name, err)
@@ -104,7 +107,19 @@ func (s *ZipScanner) init() error {
 			return
 		}
 
-		s.scanner = NewScanner(shpR, dbfR, s.opts...)
+		opts := make([]Option, len(s.opts))
+		copy(opts, s.opts)
+
+		if cpgFile != nil {
+			var dec *encoding.Decoder
+			dec, err = readCpg(cpgFile)
+			if err != nil {
+				return
+			}
+			opts = append(opts, CharacterDecoder(dec))
+		}
+
+		s.scanner = NewScanner(shpR, dbfR, opts...)
 	})
 
 	return err
@@ -153,4 +168,26 @@ func (s *ZipScanner) files() (shpFile, dbfFile, cpgFile *zip.File, err error) {
 		err = fmt.Errorf("missing .dbf file")
 	}
 	return
+}
+
+func readCpg(f *zip.File) (*encoding.Decoder, error) {
+	r, err := f.Open()
+	if err != nil {
+		return nil, fmt.Errorf("failed to open cpg file: %w", err)
+	}
+
+	scanner := bufio.NewScanner(r)
+	for scanner.Scan() {
+		str := strings.TrimSpace(scanner.Text())
+		if len(str) == 0 {
+			continue
+		}
+
+		enc, _ := charset.Lookup(str)
+		if enc == nil {
+			return nil, fmt.Errorf("unknown charset '%s'", str)
+		}
+		return enc.NewDecoder(), nil
+	}
+	return nil, fmt.Errorf("missing charset")
 }

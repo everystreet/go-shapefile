@@ -28,12 +28,12 @@ func DecodePolylineP(buf []byte, num uint32, precision uint) (*Polyline, error) 
 }
 
 // Type is PolylineType.
-func (p *Polyline) Type() ShapeType {
+func (p Polyline) Type() ShapeType {
 	return PolylineType
 }
 
 // RecordNumber returns the position in the shape file.
-func (p *Polyline) RecordNumber() uint32 {
+func (p Polyline) RecordNumber() uint32 {
 	return p.number
 }
 
@@ -60,12 +60,12 @@ func DecodePolygonP(buf []byte, num uint32, precision uint) (*Polygon, error) {
 }
 
 // Type is PolygonType.
-func (p *Polygon) Type() ShapeType {
+func (p Polygon) Type() ShapeType {
 	return PolygonType
 }
 
 // RecordNumber returns the position in the shape file.
-func (p *Polygon) RecordNumber() uint32 {
+func (p Polygon) RecordNumber() uint32 {
 	return p.number
 }
 

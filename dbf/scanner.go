@@ -94,7 +94,7 @@ func (s *Scanner) Header() (Header, error) {
 func (s *Scanner) Scan(opts ...Option) error {
 	conf := defaultConfig()
 	for _, opt := range opts {
-		opt(conf)
+		opt(&conf)
 	}
 
 	if _, err := s.Header(); err != nil {
@@ -147,7 +147,7 @@ func (s *Scanner) Err() error {
 	return s.err
 }
 
-func (s *Scanner) decodeRecord(buf []byte, conf *config) {
+func (s *Scanner) decodeRecord(buf []byte, conf config) {
 	switch s.version {
 	case DBaseLevel5:
 		rec, err := dbase5.DecodeRecord(buf, s.header.(*dbase5.Header), conf)

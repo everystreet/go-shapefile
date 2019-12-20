@@ -22,7 +22,7 @@ func DecodeBoundingBoxP(buf []byte, precision uint) (*BoundingBox, error) {
 	return decodeBoundingBox(buf, &precision)
 }
 
-func (b *BoundingBox) String() string {
+func (b BoundingBox) String() string {
 	return fmt.Sprintf("(%G,%G), (%G,%G)", b.MaxX, b.MinY, b.MinX, b.MaxY)
 }
 

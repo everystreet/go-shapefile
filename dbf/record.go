@@ -19,7 +19,7 @@ type Field interface {
 
 // Fields returns a list of all fields in the record.
 // The order of the fields is nondeterministic.
-func (r *Record) Fields() []Field {
+func (r Record) Fields() []Field {
 	switch rec := r.rec.(type) {
 	case *dbase5.Record:
 		fields := make([]Field, len(rec.Fields))
@@ -35,7 +35,7 @@ func (r *Record) Fields() []Field {
 }
 
 // Field returns a field by name.
-func (r *Record) Field(name string) (Field, bool) {
+func (r Record) Field(name string) (Field, bool) {
 	switch rec := r.rec.(type) {
 	case *dbase5.Record:
 		f, ok := rec.Fields[name]
@@ -49,6 +49,6 @@ func (r *Record) Field(name string) (Field, bool) {
 }
 
 // Deleted returns the state of the "deleted" marker.
-func (r *Record) Deleted() bool {
+func (r Record) Deleted() bool {
 	return r.rec.Deleted()
 }

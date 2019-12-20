@@ -26,16 +26,16 @@ func DecodePointP(buf []byte, num uint32, precision uint) (*Point, error) {
 }
 
 // Type is PointType.
-func (p *Point) Type() ShapeType {
+func (p Point) Type() ShapeType {
 	return PointType
 }
 
 // RecordNumber returns the position in the shape file.
-func (p *Point) RecordNumber() uint32 {
+func (p Point) RecordNumber() uint32 {
 	return p.number
 }
 
-func (p *Point) String() string {
+func (p Point) String() string {
 	return fmt.Sprintf("(%G,%G)", p.X, p.Y)
 }
 

@@ -1,17 +1,17 @@
 package dbf
 
 import (
-	"github.com/everystreet/go-shapefile/cpg"
+	"golang.org/x/text/encoding"
 )
 
 // Option funcs can be passed to Scanner.Scan().
 type Option func(*config)
 
-// CharacterEncoding sets the encoding of character field values.
+// CharacterDecoder sets the encoding of character field values.
 // By default, ASCII is assumed.
-func CharacterEncoding(enc cpg.CharacterEncoding) Option {
+func CharacterDecoder(dec *encoding.Decoder) Option {
 	return func(c *config) {
-		c.charEnc = enc
+		c.charDec = dec
 	}
 }
 
@@ -26,22 +26,22 @@ func FilterFields(names ...string) Option {
 
 // Config for dbf parsing.
 type config struct {
-	charEnc cpg.CharacterEncoding
+	charDec *encoding.Decoder
 	fields  []string
 }
 
-// CharacterEncoding returns the configured encoding.
-func (c *config) CharacterEncoding() cpg.CharacterEncoding {
-	return c.charEnc
+// CharacterDecoder returns the configured encoding.
+func (c config) CharacterDecoder() *encoding.Decoder {
+	return c.charDec
 }
 
 // FilteredFields returns the configured field names.
-func (c *config) FilteredFields() []string {
+func (c config) FilteredFields() []string {
 	return c.fields
 }
 
-func defaultConfig() *config {
-	return &config{
-		charEnc: cpg.EncodingASCII,
+func defaultConfig() config {
+	return config{
+		charDec: encoding.Nop.NewDecoder(),
 	}
 }

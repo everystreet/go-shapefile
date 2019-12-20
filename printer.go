@@ -46,7 +46,7 @@ func NewTablePrinter(s Scannable, fields ...string) (*TablePrinter, error) {
 }
 
 // Print writes a tab-delimited table to the supplied destination.
-func (p *TablePrinter) Print(out io.Writer) error {
+func (p TablePrinter) Print(out io.Writer) error {
 	if err := p.scanner.Scan(); err != nil {
 		return err
 	}
@@ -80,7 +80,7 @@ func (p *TablePrinter) Print(out io.Writer) error {
 }
 
 // PrettyPrint writes a pretty ASCII table to the supplied destination.
-func (p *TablePrinter) PrettyPrint(out io.Writer) error {
+func (p TablePrinter) PrettyPrint(out io.Writer) error {
 	if err := p.scanner.Scan(); err != nil {
 		return err
 	}
@@ -115,7 +115,7 @@ func (p *TablePrinter) PrettyPrint(out io.Writer) error {
 	return nil
 }
 
-func (p *TablePrinter) header() ([]string, error) {
+func (p TablePrinter) header() ([]string, error) {
 	info, err := p.scanner.Info()
 	if err != nil {
 		return nil, err
@@ -132,7 +132,7 @@ func (p *TablePrinter) header() ([]string, error) {
 	return header, nil
 }
 
-func (p *TablePrinter) row(rec *Record) ([]string, error) {
+func (p TablePrinter) row(rec *Record) ([]string, error) {
 	row := []string{fmt.Sprintf("%d", rec.Shape.RecordNumber())}
 
 	// Add all fields if none specified

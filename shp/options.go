@@ -14,7 +14,3 @@ func PointPrecision(p uint) Option {
 type config struct {
 	precision *uint
 }
-
-func defaultConfig() *config {
-	return &config{}
-}

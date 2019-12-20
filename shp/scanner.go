@@ -69,9 +69,9 @@ func (s *Scanner) Validator() (*Validator, error) {
 // An error is returned if there's a problem parsing the header.
 // Errors that are encountered when parsing records must be checked with the Err method.
 func (s *Scanner) Scan() error {
-	conf := defaultConfig()
+	var conf config
 	for _, opt := range s.opts {
-		opt(conf)
+		opt(&conf)
 	}
 
 	if _, err := s.Header(); err != nil {
@@ -90,7 +90,7 @@ func (s *Scanner) Scan() error {
 					s.setErr(err)
 					return
 				}
-				s.decodeRecord(rec, conf)
+				s.decodeRecord(*rec, conf)
 			}
 		}()
 	})
@@ -114,7 +114,7 @@ func (s *Scanner) Err() error {
 	return s.err
 }
 
-func (s *Scanner) decodeRecord(rec *record, conf *config) {
+func (s *Scanner) decodeRecord(rec record, conf config) {
 	if rec.shapeType == Null {
 		return
 	} else if rec.shapeType != s.header.ShapeType {
@@ -138,7 +138,7 @@ func (s *Scanner) decodeRecord(rec *record, conf *config) {
 	s.shapesCh <- shape
 }
 
-func (s *Scanner) decodeShape(rec *record) (Shape, error) {
+func (s *Scanner) decodeShape(rec record) (Shape, error) {
 	switch rec.shapeType {
 	case PointType:
 		return DecodePoint(rec.shape, rec.number)
@@ -151,7 +151,7 @@ func (s *Scanner) decodeShape(rec *record) (Shape, error) {
 	}
 }
 
-func (s *Scanner) decodeShapeP(rec *record, precision uint) (Shape, error) {
+func (s *Scanner) decodeShapeP(rec record, precision uint) (Shape, error) {
 	switch rec.shapeType {
 	case PointType:
 		return DecodePointP(rec.shape, rec.number, precision)

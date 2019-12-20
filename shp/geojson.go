@@ -5,18 +5,18 @@ import (
 )
 
 // GeoJSONFeature creates a GeoJSON Point from a Shapefile Point.
-func (p *Point) GeoJSONFeature() *geojson.Feature {
+func (p Point) GeoJSONFeature() *geojson.Feature {
 	return geojson.NewPoint(p.X, p.Y)
 }
 
 // GeoJSONFeature creates a GeoJSON MultiLineString from a Shapefile Polyline.
-func (p *Polyline) GeoJSONFeature() *geojson.Feature {
+func (p Polyline) GeoJSONFeature() *geojson.Feature {
 	strings := sliceOfPositionSlices(p.Parts)
 	return withBox(&p.BoundingBox, geojson.NewMultiLineString(strings...))
 }
 
 // GeoJSONFeature creates a GeoJSON Polygon from a Shapefile Polygon.
-func (p *Polygon) GeoJSONFeature() *geojson.Feature {
+func (p Polygon) GeoJSONFeature() *geojson.Feature {
 	strings := sliceOfPositionSlices(p.Parts)
 	return withBox(&p.BoundingBox, geojson.NewPolygon(strings...))
 }

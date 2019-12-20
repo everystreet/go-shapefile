@@ -9,5 +9,7 @@ require (
 	github.com/golang/geo v0.0.0-20190916061304-5b978397cfec
 	github.com/olekukonko/tablewriter v0.0.4
 	github.com/stretchr/testify v1.4.0
+	golang.org/x/net v0.0.0-20191209160850-c0dbc17a3553
+	golang.org/x/text v0.3.2
 	gopkg.in/alecthomas/kingpin.v2 v2.2.6
 )

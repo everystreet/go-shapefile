@@ -18,6 +18,6 @@ func NewError(err error, recordNum uint32) *Error {
 	}
 }
 
-func (e *Error) Error() string {
+func (e Error) Error() string {
 	return fmt.Sprintf("error reading record %d: %v", e.recordNum, e.err)
 }

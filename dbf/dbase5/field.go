@@ -41,6 +41,6 @@ func DecodeFieldDesc(buf []byte) (*FieldDesc, error) {
 }
 
 // Name of the field.
-func (f *FieldDesc) Name() string {
+func (f FieldDesc) Name() string {
 	return f.name
 }

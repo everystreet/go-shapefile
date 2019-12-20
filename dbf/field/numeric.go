@@ -27,6 +27,6 @@ func DecodeNumeric(buf []byte, name string) (*Numeric, error) {
 }
 
 // Value returns the field value.
-func (n *Numeric) Value() interface{} {
+func (n Numeric) Value() interface{} {
 	return n.Number
 }

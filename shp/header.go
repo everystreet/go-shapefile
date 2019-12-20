@@ -15,9 +15,9 @@ type Header struct {
 
 // DecodeHeader decodes a shp header.
 func DecodeHeader(buf []byte, opts ...Option) (*Header, error) {
-	conf := defaultConfig()
+	var conf config
 	for _, opt := range opts {
-		opt(conf)
+		opt(&conf)
 	}
 
 	if len(buf) != 100 {

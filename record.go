@@ -20,7 +20,7 @@ type Attributes interface {
 }
 
 // GeoJSONFeature creates a GeoJSON Feature for the Shapefile Record.
-func (r *Record) GeoJSONFeature(opts ...GeoJSONOption) *geojson.Feature {
+func (r Record) GeoJSONFeature(opts ...GeoJSONOption) *geojson.Feature {
 	conf := geoJSONConfig{}
 	for _, opt := range opts {
 		opt(&conf)
