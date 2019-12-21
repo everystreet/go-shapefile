@@ -4,15 +4,23 @@ import (
 	"encoding/binary"
 	"fmt"
 	"math"
+
+	"github.com/golang/geo/r2"
 )
 
 // Point is a single pair of X and Y coordinates.
 type Point struct {
-	X float64
-	Y float64
+	r2.Point
 
 	number uint32
 	box    *BoundingBox
+}
+
+// MakePoint creates a new Point for the provided coordinate.
+func MakePoint(x, y float64) Point {
+	return Point{
+		Point: r2.Point{X: x, Y: y},
+	}
 }
 
 // DecodePoint decodes a single point shape.
@@ -46,8 +54,10 @@ func decodePoint(buf []byte, num uint32, precision *uint) (*Point, error) {
 
 	float := bytesToFloat64Wrapper(precision)
 	return &Point{
-		X:      float(buf[0:8]),
-		Y:      float(buf[8:16]),
+		Point: r2.Point{
+			X: float(buf[0:8]),
+			Y: float(buf[8:16]),
+		},
 		number: num,
 	}, nil
 }

@@ -26,7 +26,7 @@ func NewValidator(box *BoundingBox) (*Validator, error) {
 }
 
 // Validate the Point by checking that it is within the shp file bounding box.
-func (p *Point) Validate(v *Validator) error {
+func (p Point) Validate(v *Validator) error {
 	ll := pointToLatLng(p)
 
 	if p.box != nil {
@@ -58,7 +58,7 @@ func (p Polyline) Validate(v *Validator) error {
 			if err := point.Validate(v); err != nil {
 				return err
 			}
-			latlngs[i] = pointToLatLng(&point)
+			latlngs[i] = pointToLatLng(point)
 		}
 
 		line := s2.PolylineFromLatLngs(latlngs)
@@ -89,6 +89,6 @@ func boxToRect(box *BoundingBox) (*s2.Rect, error) {
 	return rect, nil
 }
 
-func pointToLatLng(p *Point) s2.LatLng {
+func pointToLatLng(p Point) s2.LatLng {
 	return s2.LatLngFromDegrees(p.Y, p.X)
 }

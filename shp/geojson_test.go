@@ -9,7 +9,7 @@ import (
 )
 
 func TestPointToGeoJSON(t *testing.T) {
-	p := shp.Point{X: 12.34, Y: 56.78}
+	p := shp.MakePoint(12.34, 56.78)
 	require.Equal(t, geojson.NewPoint(12.34, 56.78), p.GeoJSONFeature())
 }
 
@@ -23,8 +23,8 @@ func TestPolylineToGeoJSON(t *testing.T) {
 		},
 		Parts: []shp.Part{
 			{
-				shp.Point{X: 12.34, Y: 56.78},
-				shp.Point{X: 23.45, Y: 67.89},
+				shp.MakePoint(12.34, 56.78),
+				shp.MakePoint(23.45, 67.89),
 			},
 		},
 	}
@@ -52,8 +52,8 @@ func TestPolygonToGeoJSON(t *testing.T) {
 		},
 		Parts: []shp.Part{
 			{
-				shp.Point{X: 12.34, Y: 56.78},
-				shp.Point{X: 23.45, Y: 67.89},
+				shp.MakePoint(12.34, 56.78),
+				shp.MakePoint(23.45, 67.89),
 			},
 		},
 	}

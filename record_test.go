@@ -12,7 +12,7 @@ import (
 
 func TestRecordToGeoJSON(t *testing.T) {
 	rec := shapefile.Record{
-		Shape: &shp.Point{X: 0, Y: 0},
+		Shape: shp.MakePoint(0, 0),
 		Attributes: &fakeAttrs{
 			fields: []dbf.Field{
 				&fakeField{"prop1", "value1"},

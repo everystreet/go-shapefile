@@ -30,7 +30,9 @@ func TestValidatePolyline(t *testing.T) {
 			"no edges",
 			&shp.Polyline{
 				Parts: []shp.Part{
-					{{X: 0, Y: 0}},
+					{
+						shp.MakePoint(0, 0),
+					},
 				},
 			},
 			"part must have at least 1 edge",
