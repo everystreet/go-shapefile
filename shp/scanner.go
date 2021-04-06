@@ -37,7 +37,7 @@ func (s *Scanner) AddOptions(opts ...Option) {
 }
 
 // Header parses the shp file header.
-func (s *Scanner) Header() (*Header, error) {
+func (s *Scanner) Header() (Header, error) {
 	var err error
 	s.headerOnce.Do(func() {
 		buf := make([]byte, 100)
@@ -47,22 +47,20 @@ func (s *Scanner) Header() (*Header, error) {
 			return
 		}
 
-		var h *Header
-		if h, err = DecodeHeader(buf, s.opts...); err != nil {
+		if s.header, err = DecodeHeader(buf, s.opts...); err != nil {
 			return
 		}
-		s.header = *h
 	})
-	return &s.header, err
+	return s.header, err
 }
 
 // Validator returns a Validator that can be used to validate Shapes using the Validate method.
-func (s *Scanner) Validator() (*Validator, error) {
+func (s *Scanner) Validator() (Validator, error) {
 	h, err := s.Header()
 	if err != nil {
-		return nil, fmt.Errorf("failed to decode header: %w", err)
+		return Validator{}, fmt.Errorf("failed to decode header: %w", err)
 	}
-	return NewValidator(&h.BoundingBox)
+	return MakeValidator(h.BoundingBox)
 }
 
 // Scan starts reading the shp file. Shapes can be accessed from the Shape method.

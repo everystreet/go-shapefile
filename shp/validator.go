@@ -10,27 +10,27 @@ import (
 
 // Validator is used to validate shapes inside a shp file.
 type Validator struct {
-	box *s2.Rect
+	box s2.Rect
 }
 
-// NewValidator creates a new Validator based on the constraints of a particular shp file.
-func NewValidator(box *BoundingBox) (*Validator, error) {
+// MakeValidator creates a new Validator based on the constraints of a particular shp file.
+func MakeValidator(box BoundingBox) (Validator, error) {
 	rect, err := boxToRect(box)
 	if err != nil {
-		return nil, err
+		return Validator{}, err
 	}
 
-	return &Validator{
+	return Validator{
 		box: rect,
 	}, nil
 }
 
 // Validate the Point by checking that it is within the shp file bounding box.
-func (p Point) Validate(v *Validator) error {
+func (p Point) Validate(v Validator) error {
 	ll := pointToLatLng(p)
 
 	if p.box != nil {
-		box, err := boxToRect(p.box)
+		box, err := boxToRect(*p.box)
 		if err != nil {
 			return err
 		}
@@ -47,7 +47,7 @@ func (p Point) Validate(v *Validator) error {
 }
 
 // Validate the Polyline.
-func (p Polyline) Validate(v *Validator) error {
+func (p Polyline) Validate(v Validator) error {
 	if len(p.Parts) < 1 {
 		return fmt.Errorf("must contain at least 1 part")
 	}
@@ -70,21 +70,21 @@ func (p Polyline) Validate(v *Validator) error {
 }
 
 // Validate the Polygon.
-func (p Polygon) Validate(v *Validator) error {
+func (p Polygon) Validate(v Validator) error {
 	return (Polyline)(p).Validate(v)
 }
 
-func boxToRect(box *BoundingBox) (*s2.Rect, error) {
+func boxToRect(box BoundingBox) (s2.Rect, error) {
 	tl := s2.LatLngFromDegrees(box.MaxY, box.MinX)
 	br := s2.LatLngFromDegrees(box.MinY, box.MaxX)
 
-	rect := &s2.Rect{
+	rect := s2.Rect{
 		Lat: r1.Interval{Lo: br.Lat.Radians(), Hi: tl.Lat.Radians()},
 		Lng: s1.Interval{Lo: tl.Lng.Radians(), Hi: br.Lng.Radians()},
 	}
 
 	if !rect.IsValid() {
-		return nil, fmt.Errorf("invalid box")
+		return s2.Rect{}, fmt.Errorf("invalid box")
 	}
 	return rect, nil
 }

@@ -1,8 +1,6 @@
 package dbf
 
-import (
-	"golang.org/x/text/encoding"
-)
+import "golang.org/x/text/encoding"
 
 // Option funcs can be passed to Scanner.Scan().
 type Option func(*config)

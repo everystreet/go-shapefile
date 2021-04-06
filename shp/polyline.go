@@ -17,13 +17,13 @@ type Polyline struct {
 type Part []Point
 
 // DecodePolyline parses a single polyline shape, but does not validate its complicance with the spec.
-func DecodePolyline(buf []byte, num uint32) (*Polyline, error) {
+func DecodePolyline(buf []byte, num uint32) (Polyline, error) {
 	return decodePolyline(buf, num, nil)
 }
 
 // DecodePolylineP parses a single polyline shape with the specified precision,
 // but does not validate its complicance with the spec.
-func DecodePolylineP(buf []byte, num uint32, precision uint) (*Polyline, error) {
+func DecodePolylineP(buf []byte, num uint32, precision uint) (Polyline, error) {
 	return decodePolyline(buf, num, &precision)
 }
 
@@ -41,22 +41,22 @@ func (p Polyline) RecordNumber() uint32 {
 type Polygon Polyline
 
 // DecodePolygon decodes a single polygon shape, but does not validate its complicance with the spec.
-func DecodePolygon(buf []byte, num uint32) (*Polygon, error) {
+func DecodePolygon(buf []byte, num uint32) (Polygon, error) {
 	p, err := DecodePolyline(buf, num)
 	if err != nil {
-		return nil, err
+		return Polygon{}, err
 	}
-	return (*Polygon)(p), nil
+	return Polygon(p), nil
 }
 
 // DecodePolygonP decodes a single polygon shape with the specified precision,
 // but does not validate its complicance with the spec.
-func DecodePolygonP(buf []byte, num uint32, precision uint) (*Polygon, error) {
+func DecodePolygonP(buf []byte, num uint32, precision uint) (Polygon, error) {
 	p, err := DecodePolylineP(buf, num, precision)
 	if err != nil {
-		return nil, err
+		return Polygon{}, err
 	}
-	return (*Polygon)(p), nil
+	return Polygon(p), nil
 }
 
 // Type is PolygonType.
@@ -69,33 +69,33 @@ func (p Polygon) RecordNumber() uint32 {
 	return p.number
 }
 
-func decodePolyline(buf []byte, num uint32, precision *uint) (*Polyline, error) {
-	var box *BoundingBox
+func decodePolyline(buf []byte, num uint32, precision *uint) (Polyline, error) {
+	var box BoundingBox
 	var err error
 	if precision == nil {
 		if box, err = DecodeBoundingBox(buf[0:]); err != nil {
-			return nil, err
+			return Polyline{}, err
 		}
 	} else {
 		if box, err = DecodeBoundingBoxP(buf[0:], *precision); err != nil {
-			return nil, err
+			return Polyline{}, err
 		}
 	}
 
 	const minBytes = 40
 	if len(buf) < minBytes {
-		return nil, fmt.Errorf("expecting %d bytes but only have %d", minBytes, len(buf))
+		return Polyline{}, fmt.Errorf("expecting %d bytes but only have %d", minBytes, len(buf))
 	}
 
 	numParts := binary.LittleEndian.Uint32(buf[32:36])
 	numPoints := binary.LittleEndian.Uint32(buf[36:40])
 	numBytes := minBytes + (numParts * 4) + (numPoints * 16)
 	if len(buf) < int(numBytes) {
-		return nil, fmt.Errorf("expecting %d bytes but only have %d", numBytes, len(buf))
+		return Polyline{}, fmt.Errorf("expecting %d bytes but only have %d", numBytes, len(buf))
 	}
 
-	out := &Polyline{
-		BoundingBox: *box,
+	out := Polyline{
+		BoundingBox: box,
 		Parts:       make([]Part, numParts),
 		number:      num,
 	}
@@ -106,11 +106,11 @@ func decodePolyline(buf []byte, num uint32, precision *uint) (*Polyline, error) 
 		parts[i] = binary.LittleEndian.Uint32(buf[n : n+4])
 	}
 
-	var point func([]byte, uint32) (*Point, error)
+	var point func([]byte, uint32) (Point, error)
 	if precision == nil {
 		point = DecodePoint
 	} else {
-		point = func(buf []byte, num uint32) (*Point, error) {
+		point = func(buf []byte, num uint32) (Point, error) {
 			return DecodePointP(buf, num, *precision)
 		}
 	}
@@ -129,10 +129,10 @@ func decodePolyline(buf []byte, num uint32, precision *uint) (*Polyline, error) 
 			x := int(start) + j
 			p, err := point(buf[pointsOffset+(x*16):pointsOffset+(x*16)+16], num)
 			if err != nil {
-				return nil, fmt.Errorf("failed to decode point: %w", err)
+				return Polyline{}, fmt.Errorf("failed to decode point: %w", err)
 			}
-			p.box = box
-			out.Parts[i][j] = *p
+			p.box = &box
+			out.Parts[i][j] = p
 		}
 	}
 	return out, nil

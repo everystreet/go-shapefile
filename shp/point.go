@@ -24,12 +24,12 @@ func MakePoint(x, y float64) Point {
 }
 
 // DecodePoint decodes a single point shape.
-func DecodePoint(buf []byte, num uint32) (*Point, error) {
+func DecodePoint(buf []byte, num uint32) (Point, error) {
 	return decodePoint(buf, num, nil)
 }
 
 // DecodePointP decodes a single point shape with specified precision.
-func DecodePointP(buf []byte, num uint32, precision uint) (*Point, error) {
+func DecodePointP(buf []byte, num uint32, precision uint) (Point, error) {
 	return decodePoint(buf, num, &precision)
 }
 
@@ -47,13 +47,13 @@ func (p Point) String() string {
 	return fmt.Sprintf("(%G,%G)", p.X, p.Y)
 }
 
-func decodePoint(buf []byte, num uint32, precision *uint) (*Point, error) {
+func decodePoint(buf []byte, num uint32, precision *uint) (Point, error) {
 	if len(buf) < 16 {
-		return nil, fmt.Errorf("expecting 16 bytes buf only have %d", len(buf))
+		return Point{}, fmt.Errorf("expecting 16 bytes buf only have %d", len(buf))
 	}
 
 	float := bytesToFloat64Wrapper(precision)
-	return &Point{
+	return Point{
 		Point: r2.Point{
 			X: float(buf[0:8]),
 			Y: float(buf[8:16]),

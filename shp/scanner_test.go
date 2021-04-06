@@ -18,7 +18,7 @@ func TestScan(t *testing.T) {
 	h, err := s.Header()
 	require.NoError(t, err)
 
-	require.Equal(t, &shp.Header{
+	require.Equal(t, shp.Header{
 		FileLength: 180400,
 		Version:    1000,
 		ShapeType:  shp.PolygonType,
@@ -49,7 +49,7 @@ func TestScan(t *testing.T) {
 		require.NoError(t, shape.Validate(v))
 
 		switch s := shape.(type) {
-		case *shp.Polygon:
+		case shp.Polygon:
 			for _, p := range s.Parts {
 				points += len(p)
 			}

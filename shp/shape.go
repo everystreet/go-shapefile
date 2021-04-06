@@ -1,8 +1,6 @@
 package shp
 
-import (
-	"github.com/everystreet/go-geojson/v2"
-)
+import "github.com/everystreet/go-geojson/v2"
 
 // ShapeType represents a shape type in the shp file.
 type ShapeType uint
@@ -31,7 +29,7 @@ const (
 type Shape interface {
 	Type() ShapeType
 	RecordNumber() uint32
-	Validate(*Validator) error
+	Validate(Validator) error
 	GeoJSONFeature() *geojson.Feature
 }
 

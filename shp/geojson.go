@@ -1,8 +1,6 @@
 package shp
 
-import (
-	"github.com/everystreet/go-geojson/v2"
-)
+import "github.com/everystreet/go-geojson/v2"
 
 // GeoJSONFeature creates a GeoJSON Point from a Shapefile Point.
 func (p Point) GeoJSONFeature() *geojson.Feature {

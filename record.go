@@ -8,8 +8,8 @@ import (
 
 // Record consists of a shape (read from the .shp file) and attributes (from the .dbf file).
 type Record struct {
-	Shape      shp.Shape
-	Attributes Attributes
+	shp.Shape
+	Attributes
 }
 
 // Attributes provides access to the dbf record.

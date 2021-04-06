@@ -8,27 +8,29 @@ import (
 )
 
 func TestValidatePolyline(t *testing.T) {
-	v, err := shp.NewValidator(&shp.BoundingBox{
-		MinY: -90,
-		MaxY: 90,
-		MinX: -180,
-		MaxX: 180,
-	})
+	v, err := shp.MakeValidator(
+		shp.BoundingBox{
+			MinY: -90,
+			MaxY: 90,
+			MinX: -180,
+			MaxX: 180,
+		},
+	)
 	require.NoError(t, err)
 
 	tests := []struct {
 		name     string
-		polyline *shp.Polyline
+		polyline shp.Polyline
 		err      string
 	}{
 		{
 			"no parts",
-			&shp.Polyline{},
+			shp.Polyline{},
 			"must contain at least 1 part",
 		},
 		{
 			"no edges",
-			&shp.Polyline{
+			shp.Polyline{
 				Parts: []shp.Part{
 					{
 						shp.MakePoint(0, 0),

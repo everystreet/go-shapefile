@@ -1,8 +1,6 @@
 package shp
 
-import (
-	"fmt"
-)
+import "fmt"
 
 // Error describes an error that occured when parsing a shape.
 type Error struct {
@@ -11,8 +9,8 @@ type Error struct {
 }
 
 // NewError returns an attached to record number.
-func NewError(err error, recordNum uint32) *Error {
-	return &Error{
+func NewError(err error, recordNum uint32) Error {
+	return Error{
 		err:       err,
 		recordNum: recordNum,
 	}

@@ -1,8 +1,6 @@
 package dbf
 
-import (
-	"fmt"
-)
+import "fmt"
 
 // Error describes an error that occured when parsing a dbf record.
 type Error struct {

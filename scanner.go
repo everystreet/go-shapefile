@@ -79,7 +79,7 @@ func (s *Scanner) Info() (*Info, error) {
 	var err error
 
 	s.infoOnce.Do(func() {
-		var shpHeader *shp.Header
+		var shpHeader shp.Header
 		if shpHeader, err = s.shp.Header(); err != nil {
 			err = fmt.Errorf("failed to parse shp header: %w", err)
 			return
