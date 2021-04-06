@@ -8,7 +8,7 @@ type ShapeType uint
 // Valid shape types. All shapes in a single shp file must be of the same type.
 const (
 	// Null shapes are allowed in any shp file, regardless of the type specified in the header.
-	Null ShapeType = 0
+	NullType ShapeType = 0
 
 	PointType       ShapeType = 1
 	PolylineType    ShapeType = 3
@@ -24,6 +24,41 @@ const (
 	MultiPointMType ShapeType = 28
 	MultiPatchType  ShapeType = 31
 )
+
+func (t ShapeType) String() string {
+	switch t {
+	case NullType:
+		return "Null Shape"
+	case PointType:
+		return "Point"
+	case PolylineType:
+		return "PolyLine"
+	case PolygonType:
+		return "Polygon"
+	case MultiPointType:
+		return "MultiPoint"
+	case PointZType:
+		return "PointZ"
+	case PolylineZType:
+		return "PolyLineZ"
+	case PolygonZType:
+		return "PolygonZ"
+	case MultiPointZType:
+		return "MultiPointZ"
+	case PointMType:
+		return "PointM"
+	case PolylineMType:
+		return "PolyLineM"
+	case PolygonMType:
+		return "PolygonM"
+	case MultiPointMType:
+		return "MultiPointM"
+	case MultiPatchType:
+		return "MultiPatch"
+	default:
+		return ""
+	}
+}
 
 // Shape provides common information for all shapes of any type.
 type Shape interface {
