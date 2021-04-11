@@ -26,7 +26,7 @@ func (c ExportSVGCmd) Run(_ *kong.Context) error {
 		return err
 	}
 
-	fields := make(map[string]string)
+	fields := make(map[string]struct{})
 	var shapes shp.Shapes
 
 	for _, path := range c.Shapefiles {
@@ -45,14 +45,9 @@ func (c ExportSVGCmd) Run(_ *kong.Context) error {
 
 			for _, filter := range filters {
 				for _, field := range info.Fields {
-					if field.Name() != filter.name {
-						continue
+					if field.Name() == filter.name {
+						fields[field.Name()] = struct{}{}
 					}
-
-					if other, ok := fields[field.Name()]; ok {
-						return fmt.Errorf("filter field name '%s' is ambiguous - exists in '%s' and '%s'", field.Name(), path, other)
-					}
-					fields[field.Name()] = path
 				}
 			}
 
@@ -117,16 +112,12 @@ func (c ExportSVGCmd) Run(_ *kong.Context) error {
 
 	for _, shape := range shapes {
 		switch v := shape.(type) {
+		case shp.Point:
+			renderPoint(canvas, v, box, c.Scale)
 		case shp.Polyline:
 			renderPolyline(canvas, v, box, c.Scale)
 		case shp.Polygon:
 			renderPolygon(canvas, v, box, c.Scale)
-		}
-
-		switch shape.Type() {
-		case shp.PolylineType, shp.PolygonType:
-		default:
-			return fmt.Errorf("record %d is of unsupported type '%s'", shape.RecordNumber(), shape.Type())
 		}
 	}
 	return nil
@@ -184,12 +175,18 @@ func open(path string) (shapefile.Scannable, io.Closer, error) {
 
 	switch info.ShapeType {
 	case
+		shp.PointType,
 		shp.PolylineType,
 		shp.PolygonType:
 		return scanner, closer, err
 	default:
 		return nil, nil, fmt.Errorf("unsupported shape type '%s'", info.ShapeType)
 	}
+}
+
+func renderPoint(canvas *svg.SVG, point shp.Point, box shp.BoundingBox, scale float64) {
+	x, y := mapPoint(point.X, point.Y, box, scale)
+	canvas.Circle(x, y, int(math.Max(scale/10, 1)), `fill="red"`)
 }
 
 func renderPolyline(canvas *svg.SVG, polyline shp.Polyline, box shp.BoundingBox, scale float64) {
@@ -200,7 +197,7 @@ func renderPolyline(canvas *svg.SVG, polyline shp.Polyline, box shp.BoundingBox,
 			xs = append(xs, x)
 			ys = append(ys, y)
 		}
-		canvas.Polyline(xs, ys)
+		canvas.Polyline(xs, ys, lineStyle(scale)...)
 	}
 }
 
@@ -212,7 +209,16 @@ func renderPolygon(canvas *svg.SVG, polygon shp.Polygon, box shp.BoundingBox, sc
 			xs = append(xs, x)
 			ys = append(ys, y)
 		}
-		canvas.Polygon(xs, ys)
+		canvas.Polygon(xs, ys, lineStyle(scale)...)
+	}
+}
+
+func lineStyle(scale float64) []string {
+	return []string{
+		`stroke="black"`,
+		fmt.Sprintf(`stroke-width="%d"`, int(math.Max(scale/100, 1))),
+		`fill="white"`,
+		`fill-opacity="0"`,
 	}
 }
 
