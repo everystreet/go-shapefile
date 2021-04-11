@@ -66,23 +66,23 @@ This package has been primarily developed to work with [Natural Earth](https://w
 
 The .shp file contains the geometry data in the form of variable-length records. A single record represents a particular shape type, although the records in a single file must all represent the same type. `go-shapefile` supports the following types:
 
-| Shape type  | Supported          |
-| ----------- |:------------------:|
+| Shape type  |     Supported      |
+| ----------- | :----------------: |
 | Point       | :heavy_check_mark: |
 | Polyline    | :heavy_check_mark: |
 | Polygon     | :heavy_check_mark: |
-| MultiPoint  | :x:                |
-| PointZ      | :x:                |
-| PolylineZ   | :x:                |
-| PolygonZ    | :x:                |
-| MultiPointZ | :x:                |
-| PointM      | :x:                |
-| PolylineM   | :x:                |
-| PolygonM    | :x:                |
-| MultiPointM | :x:                |
-| MultiPatch  | :x:                |
+| MultiPoint  |        :x:         |
+| PointZ      |        :x:         |
+| PolylineZ   |        :x:         |
+| PolygonZ    |        :x:         |
+| MultiPointZ |        :x:         |
+| PointM      |        :x:         |
+| PolylineM   |        :x:         |
+| PolygonM    |        :x:         |
+| MultiPointM |        :x:         |
+| MultiPatch  |        :x:         |
 
-Format specification: https://www.esri.com/library/whitepapers/pdfs/shapefile.pdf
+Format specification: [https://www.esri.com/library/whitepapers/pdfs/shapefile.pdf](./docs/shapefile.pdf).
 
 ### Attribute file (.dbf)
 
@@ -90,14 +90,14 @@ The .dbf file contains attributes for each shape in the .shp file. Attributes ar
 
 This file uses a format called "dBase", of which there are several variations in varying degrees of usage. The most common are dBase IV and dBase V, but `go-shapefile` currently only supports IV. Below is an overview of the supported field types:
 
-| Field type       | Supported          |
-| ---------------- |:------------------:|
+| Field type       |     Supported      |
+| ---------------- | :----------------: |
 | Character/string | :heavy_check_mark: |
 | Numeric          | :heavy_check_mark: |
-| Date             | :x:                |
+| Date             |        :x:         |
 | Floating point   | :heavy_check_mark: |
-| Logical          | :x:                |
-| Memo             | :x:                |
+| Logical          |        :x:         |
+| Memo             |        :x:         |
 
 Note that dBase V contains many more field types.
 
