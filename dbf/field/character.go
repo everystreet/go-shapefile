@@ -33,3 +33,7 @@ func DecodeCharacter(buf []byte, name string, decoder *encoding.Decoder) (*Chara
 func (c Character) Value() interface{} {
 	return c.String
 }
+
+func (c Character) Equal(v string) bool {
+	return v == c.String
+}

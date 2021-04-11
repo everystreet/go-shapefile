@@ -3,6 +3,8 @@ package shp
 import (
 	"encoding/binary"
 	"fmt"
+
+	"github.com/golang/geo/r2"
 )
 
 // Polyline is an ordered set of verticies that consists of one or more parts, where a part is one or more Point.
@@ -37,6 +39,16 @@ func (p Polyline) RecordNumber() uint32 {
 	return p.number
 }
 
+func (p Polyline) points() []r2.Point {
+	var out []r2.Point
+	for _, part := range p.Parts {
+		for _, point := range part {
+			out = append(out, point.Point)
+		}
+	}
+	return out
+}
+
 // Polygon has the same syntax as a Polyline, but the parts should be unbroken rings.
 type Polygon Polyline
 
@@ -67,6 +79,10 @@ func (p Polygon) Type() ShapeType {
 // RecordNumber returns the position in the shape file.
 func (p Polygon) RecordNumber() uint32 {
 	return p.number
+}
+
+func (p Polygon) points() []r2.Point {
+	return Polyline(p).points()
 }
 
 func decodePolyline(buf []byte, num uint32, precision *uint) (Polyline, error) {

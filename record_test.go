@@ -72,3 +72,7 @@ func (f *fakeField) Name() string {
 func (f *fakeField) Value() interface{} {
 	return f.value
 }
+
+func (f *fakeField) Equal(_ string) bool {
+	return false
+}

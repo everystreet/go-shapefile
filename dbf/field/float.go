@@ -16,3 +16,7 @@ func DecodeFloatingPoint(buf []byte, name string) (*FloatingPoint, error) {
 func (f FloatingPoint) Value() interface{} {
 	return f.Number
 }
+
+func (f FloatingPoint) Equal(v string) bool {
+	return Numeric(f).Equal(v)
+}

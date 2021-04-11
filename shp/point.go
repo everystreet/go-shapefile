@@ -47,6 +47,10 @@ func (p Point) String() string {
 	return fmt.Sprintf("(%G,%G)", p.X, p.Y)
 }
 
+func (p Point) points() []r2.Point {
+	return []r2.Point{p.Point}
+}
+
 func decodePoint(buf []byte, num uint32, precision *uint) (Point, error) {
 	if len(buf) < 16 {
 		return Point{}, fmt.Errorf("expecting 16 bytes buf only have %d", len(buf))

@@ -53,3 +53,25 @@ func DecodeHeader(buf []byte, opts ...Option) (Header, error) {
 
 	return out, nil
 }
+
+func validShapeType(u uint32) bool {
+	switch ShapeType(u) {
+	case
+		PointType,
+		PolylineType,
+		PolygonType,
+		MultiPointType,
+		PointZType,
+		PolylineZType,
+		PolygonZType,
+		MultiPointZType,
+		PointMType,
+		PolylineMType,
+		PolygonMType,
+		MultiPointMType,
+		MultiPatchType:
+		return true
+	default:
+		return false
+	}
+}

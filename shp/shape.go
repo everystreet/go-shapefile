@@ -1,6 +1,9 @@
 package shp
 
-import "github.com/everystreet/go-geojson/v2"
+import (
+	"github.com/everystreet/go-geojson/v2"
+	"github.com/golang/geo/r2"
+)
 
 // ShapeType represents a shape type in the shp file.
 type ShapeType uint
@@ -66,26 +69,22 @@ type Shape interface {
 	RecordNumber() uint32
 	Validate(Validator) error
 	GeoJSONFeature() *geojson.Feature
+	points() []r2.Point
 }
 
-func validShapeType(u uint32) bool {
-	switch ShapeType(u) {
-	case
-		PointType,
-		PolylineType,
-		PolygonType,
-		MultiPointType,
-		PointZType,
-		PolylineZType,
-		PolygonZType,
-		MultiPointZType,
-		PointMType,
-		PolylineMType,
-		PolygonMType,
-		MultiPointMType,
-		MultiPatchType:
-		return true
-	default:
-		return false
+type Shapes []Shape
+
+func (s Shapes) BoundingBox() BoundingBox {
+	var points []r2.Point
+	for _, shape := range s {
+		points = append(points, shape.points()...)
+	}
+
+	rect := r2.RectFromPoints(points...)
+	return BoundingBox{
+		MinX: rect.X.Lo,
+		MinY: rect.Y.Lo,
+		MaxX: rect.X.Hi,
+		MaxY: rect.Y.Hi,
 	}
 }

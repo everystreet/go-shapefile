@@ -18,6 +18,7 @@ type Record struct {
 type Field interface {
 	Name() string
 	Value() interface{}
+	Equal(string) bool
 }
 
 // Config provides config for record parsing.

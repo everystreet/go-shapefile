@@ -13,6 +13,7 @@ type Record struct {
 type Field interface {
 	Name() string
 	Value() interface{}
+	Equal(string) bool
 }
 
 // Fields returns a list of all fields in the record.

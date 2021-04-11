@@ -30,3 +30,11 @@ func DecodeNumeric(buf []byte, name string) (*Numeric, error) {
 func (n Numeric) Value() interface{} {
 	return n.Number
 }
+
+func (n Numeric) Equal(v string) bool {
+	f, err := strconv.ParseFloat(v, 64)
+	if err != nil {
+		return false
+	}
+	return f == n.Number
+}

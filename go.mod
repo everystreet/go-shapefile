@@ -3,6 +3,7 @@ module github.com/everystreet/go-shapefile
 go 1.13
 
 require (
+	github.com/ajstarks/svgo v0.0.0-20200725142600-7a3c8b57fecb
 	github.com/alecthomas/kong v0.2.16
 	github.com/alecthomas/template v0.0.0-20190718012654-fb15b899a751 // indirect
 	github.com/alecthomas/units v0.0.0-20210208195552-ff826a37aa15 // indirect
