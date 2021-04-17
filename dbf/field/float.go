@@ -17,6 +17,7 @@ func (f FloatingPoint) Value() interface{} {
 	return f.Number
 }
 
+// Equal returns true if v contains the same value as f.
 func (f FloatingPoint) Equal(v string) bool {
 	return Numeric(f).Equal(v)
 }

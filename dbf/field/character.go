@@ -34,6 +34,7 @@ func (c Character) Value() interface{} {
 	return c.String
 }
 
+// Equal returns true if v contains the same value as c.
 func (c Character) Equal(v string) bool {
 	return v == c.String
 }

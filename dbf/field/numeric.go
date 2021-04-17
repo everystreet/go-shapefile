@@ -31,6 +31,7 @@ func (n Numeric) Value() interface{} {
 	return n.Number
 }
 
+// Equal returns true if v contains the same value as n.
 func (n Numeric) Equal(v string) bool {
 	f, err := strconv.ParseFloat(v, 64)
 	if err != nil {

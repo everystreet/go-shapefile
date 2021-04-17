@@ -72,8 +72,10 @@ type Shape interface {
 	points() []r2.Point
 }
 
+// Shapes represents a collection of shapes.
 type Shapes []Shape
 
+// BoundingBox returns the bounding box that encompasses all shapes.
 func (s Shapes) BoundingBox() BoundingBox {
 	var points []r2.Point
 	for _, shape := range s {
