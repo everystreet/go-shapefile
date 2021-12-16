@@ -39,6 +39,7 @@ type Scanner struct {
 type Header interface {
 	RecordLen() uint16
 	NumRecords() uint32
+	FieldExists(string) bool
 }
 
 // NewScanner creates a new Scanner for the supplied source.

@@ -24,6 +24,7 @@ func main() {
 		"Attribute file (.dbf) path. Must be used in combination with --shp.").Short('d').String()
 	readFields := readCommand.Flag("fields", "Only the specified field names.").Short('f').Strings()
 	readListFields := readCommand.Flag("list-fields", "List fields only - no data.").Bool()
+	readAttributes := readCommand.Flag("attributes", "Attributes only.").Bool()
 	pretty := readCommand.Flag("pretty", "Enable pretty-printing.").Short('p').Bool()
 
 	var err error
@@ -36,6 +37,10 @@ func main() {
 			err = fmt.Errorf("--zip cannot be used with --shp or --dbf")
 		case *readZipPath != "":
 			err = dataFromZip(*readZipPath, readFields, *readListFields, *pretty)
+		case *readAttributes && *readShpPath != "":
+			err = fmt.Errorf("--shp cannot be used with --attributes")
+		case *readAttributes == true && *readDbfPath != "":
+			err = attributesFromDbf(*readDbfPath, readFields, *pretty)
 		case *readListFields == false && (*readShpPath == "" || *readDbfPath == ""):
 			err = fmt.Errorf("--shp and --dbf must be used together")
 		case *readListFields == true && *readDbfPath != "":
@@ -142,6 +147,31 @@ func fieldsFromExtracted(dbfPath string, pretty bool) error {
 		return fieldsTable(fields)
 	default:
 		return fmt.Errorf("unrecognized file type")
+	}
+}
+
+func attributesFromDbf(dbfPath string, fields *[]string, pretty bool) error {
+	dbfFile, err := os.Open(dbfPath)
+	if err != nil {
+		return fmt.Errorf("failed to open attributes file '%s': %w", dbfPath, err)
+	}
+	defer dbfFile.Close()
+
+	var p *dbf.TablePrinter
+	if fields == nil || len(*fields) == 0 {
+		if p, err = dbf.NewTablePrinter(dbf.NewScanner(dbfFile)); err != nil {
+			return err
+		}
+	} else {
+		if p, err = dbf.NewTablePrinter(dbf.NewScanner(dbfFile), *fields...); err != nil {
+			return err
+		}
+	}
+
+	if pretty {
+		return p.PrettyPrint(os.Stdout)
+	} else {
+		return p.Print(os.Stdout)
 	}
 }
 

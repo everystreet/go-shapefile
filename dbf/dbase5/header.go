@@ -64,3 +64,12 @@ func (h Header) RecordLen() uint16 {
 func (h Header) NumRecords() uint32 {
 	return h.numRecs
 }
+
+func (h Header) FieldExists(name string) bool {
+	for _, field := range h.Fields {
+		if field.name == name {
+			return true
+		}
+	}
+	return false
+}
