@@ -103,7 +103,4 @@ Note that dBase V contains many more field types.
 
 ### Character endoding file (.cpg)
 
-The .cpg file is optional and contains the character encoding used inside the .dbf file. By default, and in this file's absense, the character encoding is assumed to be ASCII, but this file can be used to support Unicode strings. `go-shapefile` supports the following encodings:
-
-* ASCII
-* UTF-8
+The .cpg file is optional and contains the character encoding used inside the .dbf file. By default, and in this file's absense, the character encoding is assumed to be ASCII, but this file can be used to support Unicode strings. `go-shapefile` supports the encoding labels defined by https://encoding.spec.whatwg.org/#names-and-labels.
