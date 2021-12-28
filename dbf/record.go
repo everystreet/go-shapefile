@@ -16,7 +16,7 @@ type Record struct {
 // Field provides common information about all field types.
 type Field interface {
 	Name() string
-	Value() interface{}
+	Value() any
 	Equal(string) bool
 }
 

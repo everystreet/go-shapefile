@@ -46,14 +46,14 @@ func TestRecordToGeoJSON(t *testing.T) {
 
 type Field struct {
 	name  string
-	value interface{}
+	value any
 }
 
 func (f Field) Name() string {
 	return f.name
 }
 
-func (f Field) Value() interface{} {
+func (f Field) Value() any {
 	return f.value
 }
 
