@@ -1,7 +1,7 @@
 package shapefile
 
 import (
-	"github.com/everystreet/go-geojson/v2"
+	geojson "github.com/everystreet/go-geojson/v2"
 	"github.com/everystreet/go-shapefile/dbf"
 	"github.com/everystreet/go-shapefile/shp"
 )
@@ -9,14 +9,7 @@ import (
 // Record consists of a shape (read from the .shp file) and attributes (from the .dbf file).
 type Record struct {
 	shp.Shape
-	Attributes
-}
-
-// Attributes provides access to the dbf record.
-type Attributes interface {
-	Fields() []dbf.Field
-	Field(string) (dbf.Field, bool)
-	Deleted() bool
+	*dbf.Record
 }
 
 // GeoJSONFeature creates a GeoJSON Feature for the Shapefile Record.
@@ -27,12 +20,14 @@ func (r Record) GeoJSONFeature(opts ...GeoJSONOption) *geojson.Feature {
 	}
 
 	feat := r.Shape.GeoJSONFeature()
-	if r.Attributes == nil {
+	if r.Record == nil {
 		return feat
 	}
 
-	feat.Properties = make(geojson.PropertyList, len(r.Attributes.Fields()))
-	for i, f := range r.Attributes.Fields() {
+	feat.Properties = make(geojson.PropertyList, len(r.Record.Fields))
+
+	var i int
+	for _, f := range r.Record.Fields {
 		name := f.Name()
 		if newName, ok := conf.oldNewPropNames[name]; ok {
 			name = newName
@@ -42,6 +37,7 @@ func (r Record) GeoJSONFeature(opts ...GeoJSONOption) *geojson.Feature {
 			Name:  name,
 			Value: f.Value(),
 		}
+		i++
 	}
 	return feat
 }

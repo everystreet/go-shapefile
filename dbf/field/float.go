@@ -13,7 +13,7 @@ func DecodeFloatingPoint(buf []byte, name string) (*FloatingPoint, error) {
 }
 
 // Value returns the field value.
-func (f FloatingPoint) Value() interface{} {
+func (f FloatingPoint) Value() any {
 	return f.Number
 }
 

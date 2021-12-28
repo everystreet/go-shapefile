@@ -1,7 +1,7 @@
 package shp
 
 import (
-	"github.com/everystreet/go-geojson/v2"
+	geojson "github.com/everystreet/go-geojson/v2"
 	"github.com/golang/geo/r2"
 )
 

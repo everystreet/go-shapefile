@@ -1,4 +1,4 @@
-package dbase5
+package dbf
 
 import (
 	"bytes"
@@ -21,7 +21,6 @@ const (
 // FieldDesc represents a field descriptor consisting of a type, name and size in bytes.
 type FieldDesc struct {
 	Type FieldType
-
 	name string
 	len  uint8
 }

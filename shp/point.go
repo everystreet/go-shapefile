@@ -44,7 +44,7 @@ func (p Point) RecordNumber() uint32 {
 }
 
 func (p Point) String() string {
-	return fmt.Sprintf("(%G,%G)", p.X, p.Y)
+	return fmt.Sprintf("(%G,%G)", p.Point.X, p.Point.Y)
 }
 
 func (p Point) points() []r2.Point {

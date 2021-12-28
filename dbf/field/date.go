@@ -35,7 +35,7 @@ func DecodeDate(buf []byte, name string) (*Date, error) {
 }
 
 // Value returns the field value.
-func (d Date) Value() interface{} {
+func (d Date) Value() any {
 	return d.Date
 }
 

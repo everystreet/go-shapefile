@@ -6,7 +6,6 @@ import (
 	"testing"
 
 	"github.com/everystreet/go-shapefile/dbf"
-	"github.com/everystreet/go-shapefile/dbf/dbase5"
 	"github.com/stretchr/testify/require"
 )
 
@@ -16,16 +15,12 @@ func TestScanner(t *testing.T) {
 
 	s := dbf.NewScanner(r)
 
-	v, err := s.Version()
-	require.NoError(t, err)
-	require.Equal(t, dbf.DBaseLevel5, v)
-
 	h, err := s.Header()
 	require.NoError(t, err)
-	require.IsType(t, &dbase5.Header{}, h)
+	require.Equal(t, dbf.DBaseLevel5, h.Version())
 	require.Equal(t, 1869, int(h.RecordLen()))
 	require.Equal(t, 171, int(h.NumRecords()))
-	require.Len(t, h.(*dbase5.Header).Fields, 94)
+	require.Len(t, h.Fields, 94)
 
 	err = s.Scan()
 	require.NoError(t, err)
@@ -53,16 +48,12 @@ func TestScanner2(t *testing.T) {
 
 	s := dbf.NewScanner(r)
 
-	v, err := s.Version()
-	require.NoError(t, err)
-	require.Equal(t, dbf.DBaseLevel5, v)
-
 	h, err := s.Header()
 	require.NoError(t, err)
-	require.IsType(t, &dbase5.Header{}, h)
+	require.Equal(t, dbf.DBaseLevel5, h.Version())
 	require.Equal(t, 170, int(h.RecordLen()))
 	require.Equal(t, 2274, int(h.NumRecords()))
-	require.Len(t, h.(*dbase5.Header).Fields, 17)
+	require.Len(t, h.Fields, 17)
 
 	err = s.Scan()
 	require.NoError(t, err)

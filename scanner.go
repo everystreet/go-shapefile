@@ -6,7 +6,6 @@ import (
 	"sync"
 
 	"github.com/everystreet/go-shapefile/dbf"
-	"github.com/everystreet/go-shapefile/dbf/dbase5"
 	"github.com/everystreet/go-shapefile/shp"
 )
 
@@ -31,28 +30,10 @@ type Info struct {
 	BoundingBox shp.BoundingBox
 	NumRecords  uint32
 	ShapeType   shp.ShapeType
-	Fields      FieldDescList
+	Fields      []*dbf.FieldDesc
 }
 
-// FieldDescList is a list of field descriptors.
-type FieldDescList []FieldDesc
-
-// Exists reutnrs true if the named field exists, and false otherwise.
-func (l FieldDescList) Exists(name string) bool {
-	for _, f := range l {
-		if f.Name() == name {
-			return true
-		}
-	}
-	return false
-}
-
-// FieldDesc provides information about an attribute field.
-type FieldDesc interface {
-	Name() string
-}
-
-// NewScanner creates a new Scanner for the provided shp and dbf files.
+// NewScanner creates a new scanner for the provided shp and dbf files.
 func NewScanner(shpR, dbfR io.Reader, opts ...Option) *Scanner {
 	s := &Scanner{
 		dbf:       dbf.NewScanner(dbfR),
@@ -85,21 +66,9 @@ func (s *Scanner) Info() (*Info, error) {
 			return
 		}
 
-		var dbfHeader dbf.Header
+		var dbfHeader *dbf.Header
 		if dbfHeader, err = s.dbf.Header(); err != nil {
 			err = fmt.Errorf("failed to parse dbf header: %w", err)
-			return
-		}
-
-		var fields []FieldDesc
-		switch h := dbfHeader.(type) {
-		case *dbase5.Header:
-			fields = make([]FieldDesc, len(h.Fields))
-			for i, f := range h.Fields {
-				fields[i] = f
-			}
-		default:
-			err = fmt.Errorf("unrecognized dbf header")
 			return
 		}
 
@@ -107,7 +76,7 @@ func (s *Scanner) Info() (*Info, error) {
 			BoundingBox: shpHeader.BoundingBox,
 			NumRecords:  dbfHeader.NumRecords(),
 			ShapeType:   shpHeader.ShapeType,
-			Fields:      fields,
+			Fields:      dbfHeader.Fields,
 		}
 	})
 
@@ -126,7 +95,7 @@ func (s *Scanner) Scan() error {
 	s.scanOnce.Do(func() {
 		if err = s.shp.Scan(); err != nil {
 			return
-		} else if err = s.dbf.Scan(s.opts.dbf...); err != nil {
+		} else if err = s.dbf.Scan(); err != nil {
 			return
 		}
 
@@ -151,18 +120,18 @@ func (s *Scanner) Scan() error {
 					return
 				}
 
-				attr := s.dbf.Record()
+				record := s.dbf.Record()
 				if err = s.dbf.Err(); err != nil {
 					s.setErr(fmt.Errorf("error in dbf file: %w", err))
 					return
-				} else if attr == nil {
+				} else if record == nil {
 					s.setErr(fmt.Errorf("failed to read attributes; expecting %d but have read %d", info.NumRecords, i+1))
 					return
 				}
 
 				s.recordsCh <- &Record{
-					Shape:      shape,
-					Attributes: attr,
+					Shape:  shape,
+					Record: record,
 				}
 			}
 		}()

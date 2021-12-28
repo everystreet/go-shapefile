@@ -89,20 +89,17 @@ func (s *ZipScanner) init() error {
 
 	s.initOnce.Do(func() {
 		var shpFile, dbfFile, cpgFile *zip.File
-		shpFile, dbfFile, cpgFile, err = s.files()
-		if err != nil {
+		if shpFile, dbfFile, cpgFile, err = s.files(); err != nil {
 			return
 		}
 
 		var shpR, dbfR io.Reader
-		shpR, err = shpFile.Open()
-		if err != nil {
+		if shpR, err = shpFile.Open(); err != nil {
 			err = fmt.Errorf("failed to open %s: %w", shpFile.Name, err)
 			return
 		}
 
-		dbfR, err = dbfFile.Open()
-		if err != nil {
+		if dbfR, err = dbfFile.Open(); err != nil {
 			err = fmt.Errorf("failed to open %s: %w", dbfFile.Name, err)
 			return
 		}
@@ -112,8 +109,7 @@ func (s *ZipScanner) init() error {
 
 		if cpgFile != nil {
 			var dec *encoding.Decoder
-			dec, err = readCpg(cpgFile)
-			if err != nil {
+			if dec, err = readCpg(cpgFile); err != nil {
 				return
 			}
 			opts = append(opts, CharacterDecoder(dec))

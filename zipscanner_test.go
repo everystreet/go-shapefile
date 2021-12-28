@@ -5,7 +5,7 @@ import (
 	"path/filepath"
 	"testing"
 
-	"github.com/everystreet/go-shapefile"
+	shapefile "github.com/everystreet/go-shapefile"
 	"github.com/stretchr/testify/require"
 )
 

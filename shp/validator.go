@@ -90,5 +90,5 @@ func boxToRect(box BoundingBox) (s2.Rect, error) {
 }
 
 func pointToLatLng(p Point) s2.LatLng {
-	return s2.LatLngFromDegrees(p.Y, p.X)
+	return s2.LatLngFromDegrees(p.Point.Y, p.Point.X)
 }

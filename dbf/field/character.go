@@ -18,19 +18,19 @@ type Character struct {
 func DecodeCharacter(buf []byte, name string, decoder *encoding.Decoder) (*Character, error) {
 	val := bytes.Trim(buf, "\x00")
 
-	decVal, err := decoder.Bytes(val)
+	decoded, err := decoder.Bytes(val)
 	if err != nil {
 		return nil, fmt.Errorf("failed to decode value: %w", err)
 	}
 
 	return &Character{
 		Field:  Field{name: name},
-		String: strings.TrimSpace(string(decVal)),
+		String: strings.TrimSpace(string(decoded)),
 	}, nil
 }
 
 // Value returns the field value.
-func (c Character) Value() interface{} {
+func (c Character) Value() any {
 	return c.String
 }
 

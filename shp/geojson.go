@@ -1,10 +1,10 @@
 package shp
 
-import "github.com/everystreet/go-geojson/v2"
+import geojson "github.com/everystreet/go-geojson/v2"
 
 // GeoJSONFeature creates a GeoJSON Point from a Shapefile Point.
 func (p Point) GeoJSONFeature() *geojson.Feature {
-	return geojson.NewPoint(p.X, p.Y)
+	return geojson.NewPoint(p.Point.X, p.Point.Y)
 }
 
 // GeoJSONFeature creates a GeoJSON MultiLineString from a Shapefile Polyline.
@@ -24,7 +24,7 @@ func sliceOfPositionSlices(parts []Part) [][]geojson.Position {
 	for i, part := range parts {
 		strings[i] = make([]geojson.Position, len(part))
 		for j, point := range part {
-			strings[i][j] = geojson.MakePosition(point.Y, point.X)
+			strings[i][j] = geojson.MakePosition(point.Point.Y, point.Point.X)
 		}
 	}
 	return strings

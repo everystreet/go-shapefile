@@ -3,8 +3,8 @@ package shapefile_test
 import (
 	"testing"
 
-	"github.com/everystreet/go-geojson/v2"
-	"github.com/everystreet/go-shapefile"
+	geojson "github.com/everystreet/go-geojson/v2"
+	shapefile "github.com/everystreet/go-shapefile"
 	"github.com/everystreet/go-shapefile/dbf"
 	"github.com/everystreet/go-shapefile/shp"
 	"github.com/stretchr/testify/require"
@@ -13,11 +13,11 @@ import (
 func TestRecordToGeoJSON(t *testing.T) {
 	rec := shapefile.Record{
 		Shape: shp.MakePoint(0, 0),
-		Attributes: &fakeAttrs{
-			fields: []dbf.Field{
-				&fakeField{"prop1", "value1"},
-				&fakeField{"prop2", 2},
-				&fakeField{"prop3", "value3"},
+		Record: &dbf.Record{
+			Fields: map[string]dbf.Field{
+				"prop1": Field{"prop1", "value1"},
+				"prop2": Field{"prop2", 2},
+				"prop3": Field{"prop3", "value3"},
 			},
 		},
 	}
@@ -44,35 +44,19 @@ func TestRecordToGeoJSON(t *testing.T) {
 	})
 }
 
-type fakeAttrs struct {
-	fields []dbf.Field
-}
-
-func (f *fakeAttrs) Fields() []dbf.Field {
-	return f.fields
-}
-
-func (f *fakeAttrs) Field(name string) (dbf.Field, bool) {
-	return nil, false
-}
-
-func (f *fakeAttrs) Deleted() bool {
-	return false
-}
-
-type fakeField struct {
+type Field struct {
 	name  string
 	value interface{}
 }
 
-func (f *fakeField) Name() string {
+func (f Field) Name() string {
 	return f.name
 }
 
-func (f *fakeField) Value() interface{} {
+func (f Field) Value() interface{} {
 	return f.value
 }
 
-func (f *fakeField) Equal(_ string) bool {
+func (f Field) Equal(_ string) bool {
 	return false
 }

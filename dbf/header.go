@@ -1,4 +1,4 @@
-package dbase5
+package dbf
 
 import (
 	"encoding/binary"
@@ -8,28 +8,41 @@ import (
 
 // Header represents a dBase 5 file header.
 type Header struct {
-	Fields []*FieldDesc
-
+	Fields  []*FieldDesc
+	version Version
 	recLen  uint16
 	numRecs uint32
 }
 
+// Version is the dBase version or "level".
+type Version uint
+
+// dBase versions.
+const (
+	DBaseLevel5 Version = 3
+	DBaseLevel7 Version = 4
+)
+
 // DecodeHeader parses a dBase 5 file header.
 func DecodeHeader(r io.Reader) (*Header, error) {
-	// Read first 31 bytes after first byte
-	buf := make([]byte, 31)
+	buf := make([]byte, 32)
 	if n, err := io.ReadFull(r, buf); err != nil {
 		return nil, fmt.Errorf("read %d bytes but expecting %d: %w", n, len(buf), err)
 	}
 
 	out := &Header{
-		recLen:  binary.LittleEndian.Uint16(buf[9:11]),
-		numRecs: binary.LittleEndian.Uint32(buf[3:7]),
+		numRecs: binary.LittleEndian.Uint32(buf[4:8]),
+		recLen:  binary.LittleEndian.Uint16(buf[10:12]),
 	}
 
-	// Read remainder of header
-	headerLen := binary.LittleEndian.Uint16(buf[7:9])
-	buf = make([]byte, int(headerLen)-len(buf)-1)
+	out.version = Version(((buf[0]>>0)&1)<<0 | ((buf[0]>>1)&1)<<1 | ((buf[0]>>2)&1)<<2)
+	if out.version != DBaseLevel5 {
+		return nil, fmt.Errorf("unsupported bBase version '%d'", out.version)
+	}
+
+	// Read remainder of header.
+	headerLen := binary.LittleEndian.Uint16(buf[8:10])
+	buf = make([]byte, int(headerLen)-len(buf))
 	if n, err := io.ReadFull(r, buf); err != nil {
 		return nil, fmt.Errorf("read %d bytes but expecting %d: %w", n, len(buf), err)
 	}
@@ -53,6 +66,11 @@ func DecodeHeader(r io.Reader) (*Header, error) {
 	}
 
 	return out, nil
+}
+
+// Version returns the dBase version.
+func (h Header) Version() Version {
+	return h.version
 }
 
 // RecordLen returns the size in bytes of each record in the file.

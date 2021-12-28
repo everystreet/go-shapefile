@@ -2,14 +2,14 @@ package dbf
 
 import "golang.org/x/text/encoding"
 
-// Option funcs can be passed to Scanner.Scan().
+// Option funcs can be applied to scanning operations.
 type Option func(*config)
 
 // CharacterDecoder sets the encoding of character field values.
 // By default, ASCII is assumed.
 func CharacterDecoder(dec *encoding.Decoder) Option {
 	return func(c *config) {
-		c.charDec = dec
+		c.decoder = dec
 	}
 }
 
@@ -24,13 +24,13 @@ func FilterFields(names ...string) Option {
 
 // Config for dbf parsing.
 type config struct {
-	charDec *encoding.Decoder
+	decoder *encoding.Decoder
 	fields  []string
 }
 
 // CharacterDecoder returns the configured encoding.
 func (c config) CharacterDecoder() *encoding.Decoder {
-	return c.charDec
+	return c.decoder
 }
 
 // FilteredFields returns the configured field names.
@@ -40,6 +40,6 @@ func (c config) FilteredFields() []string {
 
 func defaultConfig() config {
 	return config{
-		charDec: encoding.Nop.NewDecoder(),
+		decoder: encoding.Nop.NewDecoder(),
 	}
 }
