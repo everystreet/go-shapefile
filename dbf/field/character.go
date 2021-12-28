@@ -30,7 +30,7 @@ func DecodeCharacter(buf []byte, name string, decoder *encoding.Decoder) (*Chara
 }
 
 // Value returns the field value.
-func (c Character) Value() any {
+func (c Character) Value() interface{} {
 	return c.String
 }
 
