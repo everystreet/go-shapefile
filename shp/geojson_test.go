@@ -10,7 +10,11 @@ import (
 
 func TestPointToGeoJSON(t *testing.T) {
 	p := shp.MakePoint(12.34, 56.78)
-	require.Equal(t, geojson.NewPoint(12.34, 56.78), p.GeoJSONFeature())
+	require.Equal(t,
+		geojson.Feature[geojson.Geometry]{
+			Geometry: geojson.NewPoint(12.34, 56.78),
+		}, *p.GeoJSONFeature(),
+	)
 }
 
 func TestPolylineToGeoJSON(t *testing.T) {
@@ -30,7 +34,7 @@ func TestPolylineToGeoJSON(t *testing.T) {
 	}
 
 	require.Equal(t,
-		geojson.Feature[*geojson.MultiLineString]{
+		geojson.Feature[geojson.Geometry]{
 			Geometry: geojson.NewMultiLineString(
 				[]geojson.Position{
 					geojson.MakePosition(56.78, 12.34),
@@ -41,8 +45,7 @@ func TestPolylineToGeoJSON(t *testing.T) {
 				BottomLeft: geojson.MakePosition(1, 1),
 				TopRight:   geojson.MakePosition(100, 100),
 			},
-		},
-		*polyline.GeoJSONFeature(),
+		}, *polyline.GeoJSONFeature(),
 	)
 }
 
@@ -63,7 +66,7 @@ func TestPolygonToGeoJSON(t *testing.T) {
 	}
 
 	require.Equal(t,
-		geojson.Feature[*geojson.Polygon]{
+		geojson.Feature[geojson.Geometry]{
 			Geometry: geojson.NewPolygon(
 				[]geojson.Position{
 					geojson.MakePosition(56.78, 12.34),
@@ -74,7 +77,6 @@ func TestPolygonToGeoJSON(t *testing.T) {
 				BottomLeft: geojson.MakePosition(1, 1),
 				TopRight:   geojson.MakePosition(100, 100),
 			},
-		},
-		*polygon.GeoJSONFeature(),
+		}, *polygon.GeoJSONFeature(),
 	)
 }
