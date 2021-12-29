@@ -10,13 +10,13 @@ import (
 // Reader parses a shp file.
 type Reader struct {
 	in         io.Reader
-	conf       config
+	conf       readerConfig
 	headerOnce sync.Once
 	header     Header
 }
 
 // NewReader creates a new reader for the supplied source.
-func NewReader(r io.Reader, opts ...Option) *Reader {
+func NewReader(r io.Reader, opts ...ReaderOption) *Reader {
 	out := Reader{
 		in:   r,
 		conf: defaultConfig(),
@@ -130,4 +130,23 @@ type record struct {
 	length    uint32
 	shapeType ShapeType
 	shape     []byte
+}
+
+// PointPrecision sets the precision of coordinates.
+func PointPrecision(p uint) ReaderOption {
+	return func(c *readerConfig) {
+		c.precision = &p
+	}
+}
+
+// ReaderOption funcs can be passed to reading operations.
+type ReaderOption func(*readerConfig)
+
+// Config for shp parsing.
+type readerConfig struct {
+	precision *uint
+}
+
+func defaultConfig() readerConfig {
+	return readerConfig{}
 }

@@ -7,6 +7,7 @@ import (
 
 	"github.com/everystreet/go-shapefile/dbf"
 	"github.com/everystreet/go-shapefile/shp"
+	"golang.org/x/text/encoding"
 )
 
 // Reader parses a pair or shp and dbf files.
@@ -27,7 +28,7 @@ type Info struct {
 }
 
 // NewReader creates a new reader for the provided shp and dbf files.
-func NewReader(shpR, dbfR io.Reader, opts ...Option) *Reader {
+func NewReader(shpR, dbfR io.Reader, opts ...ReaderOption) *Reader {
 	conf := defaultConfig()
 	for _, opt := range opts {
 		opt(&conf)
@@ -93,4 +94,37 @@ func (r *Reader) Record() (*Record, error) {
 		Shape:  shape,
 		Record: record,
 	}, nil
+}
+
+// PointPrecision sets shp.PointPrecision.
+func PointPrecision(p uint) ReaderOption {
+	return func(c *readerConfig) {
+		c.shp = append(c.shp, shp.PointPrecision(p))
+	}
+}
+
+// CharacterDecoder sets dbf.CharacterDecoder.
+func CharacterDecoder(dec *encoding.Decoder) ReaderOption {
+	return func(c *readerConfig) {
+		c.dbf = append(c.dbf, dbf.CharacterDecoder(dec))
+	}
+}
+
+// FilterFields sets dbf.FilterFields.
+func FilterFields(names ...string) ReaderOption {
+	return func(c *readerConfig) {
+		c.dbf = append(c.dbf, dbf.FilterFields(names...))
+	}
+}
+
+// ReaderOption funcs modify reading of shapefiles.
+type ReaderOption func(*readerConfig)
+
+type readerConfig struct {
+	shp []shp.ReaderOption
+	dbf []dbf.ReaderOption
+}
+
+func defaultConfig() readerConfig {
+	return readerConfig{}
 }

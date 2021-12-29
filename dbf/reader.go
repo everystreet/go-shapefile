@@ -4,12 +4,14 @@ import (
 	"fmt"
 	"io"
 	"sync"
+
+	"golang.org/x/text/encoding"
 )
 
 // Reader parses a dbf file.
 type Reader struct {
 	in             io.Reader
-	conf           config
+	conf           readerConfig
 	headerOnce     sync.Once
 	header         Header
 	recordsRead    uint32
@@ -17,7 +19,7 @@ type Reader struct {
 }
 
 // NewReader creates a new reader for the supplied source.
-func NewReader(r io.Reader, opts ...Option) *Reader {
+func NewReader(r io.Reader, opts ...ReaderOption) *Reader {
 	out := Reader{
 		in:   r,
 		conf: defaultConfig(),
@@ -85,3 +87,35 @@ func (r *Reader) readEOF() error {
 const (
 	endOfFileMarker byte = 0x1A
 )
+
+// CharacterDecoder sets the encoding of character field values.
+// By default, ASCII is assumed.
+func CharacterDecoder(dec *encoding.Decoder) ReaderOption {
+	return func(c *readerConfig) {
+		c.decoder = dec
+	}
+}
+
+// FilterFields allows filtering by field name.
+// If this option is used, only these fields will be returned in the Record.
+// Without this option, all available fields are returned.
+func FilterFields(names ...string) ReaderOption {
+	return func(c *readerConfig) {
+		c.fields = names
+	}
+}
+
+// ReaderOption funcs can be applied to reading operations.
+type ReaderOption func(*readerConfig)
+
+// Config for dbf parsing.
+type readerConfig struct {
+	decoder *encoding.Decoder
+	fields  []string
+}
+
+func defaultConfig() readerConfig {
+	return readerConfig{
+		decoder: encoding.Nop.NewDecoder(),
+	}
+}

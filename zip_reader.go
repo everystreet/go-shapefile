@@ -16,7 +16,7 @@ import (
 type ZipReader struct {
 	in       *zip.Reader
 	name     string
-	opts     []Option
+	opts     []ReaderOption
 	initOnce sync.Once
 	reader   *Reader
 }
@@ -24,7 +24,7 @@ type ZipReader struct {
 // NewZipReader creates a reader for the supplied zip file.
 // The filename parameter should be the zip file's name (as stored on disk),
 // and MUST match the names of the contained files.
-func NewZipReader(r io.ReaderAt, size int64, filename string, opts ...Option) (*ZipReader, error) {
+func NewZipReader(r io.ReaderAt, size int64, filename string, opts ...ReaderOption) (*ZipReader, error) {
 	in, err := zip.NewReader(r, size)
 	if err != nil {
 		return nil, err
@@ -79,7 +79,7 @@ func (r *ZipReader) init() error {
 			return
 		}
 
-		opts := make([]Option, len(r.opts))
+		opts := make([]ReaderOption, len(r.opts))
 		copy(opts, r.opts)
 
 		if cpgFile != nil {
