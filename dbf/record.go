@@ -27,9 +27,9 @@ type Config interface {
 }
 
 // DecodeRecord decodes a dBase 5 single record.
-func DecodeRecord(buf []byte, header *Header, conf Config) (*Record, error) {
+func DecodeRecord(buf []byte, header Header, conf Config) (Record, error) {
 	if len(buf) < 1 {
-		return nil, fmt.Errorf("expecting 1 byte but have %d", len(buf))
+		return Record{}, fmt.Errorf("expecting 1 byte but have %d", len(buf))
 	}
 
 	rec := &Record{
@@ -42,15 +42,15 @@ func DecodeRecord(buf []byte, header *Header, conf Config) (*Record, error) {
 	case 0x2A:
 		rec.deleted = true
 	default:
-		return nil, fmt.Errorf("missing deletion flag")
+		return Record{}, fmt.Errorf("unexpected deletion flag %d", buf[0])
 	}
 
 	pos := 1
 	for i, desc := range header.Fields {
 		if len(buf) < (pos + int(desc.len)) {
-			return nil, fmt.Errorf(fieldDecodeErr, desc.name, i,
-				fmt.Errorf("expecting %d bytes but have %d", desc.len, len(buf)-pos))
+			return Record{}, fmt.Errorf(fieldDecodeErr, desc.name, i, fmt.Errorf("expecting %d bytes but have %d", desc.len, len(buf)-pos))
 		}
+
 		start, end := pos, pos+int(desc.len)
 		pos += int(desc.len)
 
@@ -72,17 +72,17 @@ func DecodeRecord(buf []byte, header *Header, conf Config) (*Record, error) {
 		case NumericType:
 			f, err = field.DecodeNumeric(buf[start:end], desc.name)
 		default:
-			return nil, fmt.Errorf(fieldDecodeErr, desc.name, i,
+			return Record{}, fmt.Errorf(fieldDecodeErr, desc.name, i,
 				fmt.Errorf("unsupported field type '%c'", desc.Type))
 		}
 
 		if err != nil {
-			return nil, fmt.Errorf(fieldDecodeErr, desc.name, i, err)
+			return Record{}, fmt.Errorf(fieldDecodeErr, desc.name, i, err)
 		}
 		rec.Fields[f.Name()] = f
 	}
 
-	return rec, nil
+	return Record{}, nil
 }
 
 // Deleted returns the value of the deleted flag.

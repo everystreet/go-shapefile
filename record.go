@@ -1,7 +1,7 @@
 package shapefile
 
 import (
-	geojson "github.com/everystreet/go-geojson/v2"
+	geojson "github.com/everystreet/go-geojson/v3"
 	"github.com/everystreet/go-shapefile/dbf"
 	"github.com/everystreet/go-shapefile/shp"
 )
@@ -13,18 +13,18 @@ type Record struct {
 }
 
 // GeoJSONFeature creates a GeoJSON Feature for the Shapefile Record.
-func (r Record) GeoJSONFeature(opts ...GeoJSONOption) *geojson.Feature {
+func (r Record) GeoJSONFeature(opts ...GeoJSONOption) *geojson.Feature[geojson.Geometry] {
 	conf := geoJSONConfig{}
 	for _, opt := range opts {
 		opt(&conf)
 	}
 
-	feat := r.Shape.GeoJSONFeature()
+	feature := r.Shape.GeoJSONFeature()
 	if r.Record == nil {
-		return feat
+		return feature
 	}
 
-	feat.Properties = make(geojson.PropertyList, len(r.Record.Fields))
+	feature.Properties = make(geojson.PropertyList, len(r.Record.Fields))
 
 	var i int
 	for _, f := range r.Record.Fields {
@@ -33,22 +33,22 @@ func (r Record) GeoJSONFeature(opts ...GeoJSONOption) *geojson.Feature {
 			name = newName
 		}
 
-		feat.Properties[i] = geojson.Property{
+		feature.Properties[i] = geojson.Property{
 			Name:  name,
 			Value: f.Value(),
 		}
 		i++
 	}
-	return feat
+	return feature
 }
 
 // GeoJSONOption funcs can be passed to Record.GeoJSONFeature().
 type GeoJSONOption func(*geoJSONConfig)
 
 // RenameProperties allows shapefile field names to be mapped to user-defined GeoJSON property names.
-func RenameProperties(oldNews map[string]string) GeoJSONOption {
+func RenameProperties(oldToNew map[string]string) GeoJSONOption {
 	return func(c *geoJSONConfig) {
-		c.oldNewPropNames = oldNews
+		c.oldNewPropNames = oldToNew
 	}
 }
 

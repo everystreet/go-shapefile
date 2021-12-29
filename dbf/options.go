@@ -2,7 +2,7 @@ package dbf
 
 import "golang.org/x/text/encoding"
 
-// Option funcs can be applied to scanning operations.
+// Option funcs can be applied to reading operations.
 type Option func(*config)
 
 // CharacterDecoder sets the encoding of character field values.

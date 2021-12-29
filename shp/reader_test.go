@@ -1,6 +1,7 @@
 package shp_test
 
 import (
+	"io"
 	"os"
 	"path/filepath"
 	"testing"
@@ -9,13 +10,17 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
-func TestScan(t *testing.T) {
-	r, err := os.Open(filepath.Join("../testdata", "ne_110m_admin_0_sovereignty.shp"))
+func TestReader(t *testing.T) {
+	f, err := os.Open(filepath.Join("../testdata", "ne_110m_admin_0_sovereignty.shp"))
 	require.NoError(t, err)
 
-	s := shp.NewScanner(r, shp.PointPrecision(6))
+	defer func() {
+		require.NoError(t, f.Close())
+	}()
 
-	h, err := s.Header()
+	r := shp.NewReader(f, shp.PointPrecision(6))
+
+	h, err := r.Header()
 	require.NoError(t, err)
 
 	require.Equal(t, shp.Header{
@@ -30,20 +35,19 @@ func TestScan(t *testing.T) {
 		},
 	}, h)
 
-	err = s.Scan()
-	require.NoError(t, err)
-
-	v, err := s.Validator()
+	v, err := r.Validator()
 	require.NoError(t, err)
 
 	shapes := 0
 	points := 0
 	for {
-		shape := s.Shape()
+		shape, err := r.Shape()
 		if shape == nil {
+			require.ErrorIs(t, err, io.EOF)
 			break
 		}
-		shapes++
+
+		require.NoError(t, err)
 
 		require.Equal(t, h.ShapeType, shape.Type())
 		require.NoError(t, shape.Validate(v))
@@ -54,12 +58,13 @@ func TestScan(t *testing.T) {
 				points += len(p)
 			}
 		}
+
+		shapes++
 	}
 
 	require.Equal(t, 10641, points)
 
-	require.NoError(t, s.Err())
-	require.Equal(t, 171, shapes)
-
-	require.NoError(t, r.Close())
+	record, err := r.Shape()
+	require.Nil(t, record)
+	require.ErrorIs(t, err, io.EOF)
 }

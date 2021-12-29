@@ -1,6 +1,7 @@
 package shapefile_test
 
 import (
+	"io"
 	"os"
 	"path/filepath"
 	"testing"
@@ -9,33 +10,42 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
-func TestScanner(t *testing.T) {
+func TestReader(t *testing.T) {
 	shp, err := os.Open(filepath.Join("testdata", "ne_110m_admin_0_sovereignty.shp"))
 	require.NoError(t, err)
+
+	defer func() {
+		require.NoError(t, shp.Close())
+	}()
 
 	dbf, err := os.Open(filepath.Join("testdata", "ne_110m_admin_0_sovereignty.dbf"))
 	require.NoError(t, err)
 
-	s := shapefile.NewScanner(shp, dbf)
+	defer func() {
+		require.NoError(t, dbf.Close())
+	}()
 
-	info, err := s.Info()
-	require.NoError(t, err)
+	r := shapefile.NewReader(shp, dbf)
 
-	err = s.Scan()
+	info, err := r.Info()
 	require.NoError(t, err)
 
 	var num uint32
 	for {
-		rec := s.Record()
-		if rec == nil {
+		record, err := r.Record()
+		if record == nil {
+			require.ErrorIs(t, err, io.EOF)
 			break
 		}
+
+		require.NoError(t, err)
+
 		num++
 	}
 
-	require.NoError(t, s.Err())
 	require.Equal(t, info.NumRecords, num)
 
-	require.NoError(t, shp.Close())
-	require.NoError(t, dbf.Close())
+	record, err := r.Record()
+	require.Nil(t, record)
+	require.ErrorIs(t, err, io.EOF)
 }

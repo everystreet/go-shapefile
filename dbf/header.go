@@ -8,7 +8,7 @@ import (
 
 // Header represents a dBase 5 file header.
 type Header struct {
-	Fields  []*FieldDesc
+	Fields  []FieldDesc
 	version Version
 	recLen  uint16
 	numRecs uint32
@@ -24,43 +24,43 @@ const (
 )
 
 // DecodeHeader parses a dBase 5 file header.
-func DecodeHeader(r io.Reader) (*Header, error) {
+func DecodeHeader(r io.Reader) (Header, error) {
 	buf := make([]byte, 32)
 	if n, err := io.ReadFull(r, buf); err != nil {
-		return nil, fmt.Errorf("read %d bytes but expecting %d: %w", n, len(buf), err)
+		return Header{}, fmt.Errorf("read %d bytes but expecting %d: %w", n, len(buf), err)
 	}
 
-	out := &Header{
+	out := Header{
 		numRecs: binary.LittleEndian.Uint32(buf[4:8]),
 		recLen:  binary.LittleEndian.Uint16(buf[10:12]),
 	}
 
 	out.version = Version(((buf[0]>>0)&1)<<0 | ((buf[0]>>1)&1)<<1 | ((buf[0]>>2)&1)<<2)
 	if out.version != DBaseLevel5 {
-		return nil, fmt.Errorf("unsupported bBase version '%d'", out.version)
+		return Header{}, fmt.Errorf("unsupported bBase version '%d'", out.version)
 	}
 
 	// Read remainder of header.
 	headerLen := binary.LittleEndian.Uint16(buf[8:10])
 	buf = make([]byte, int(headerLen)-len(buf))
 	if n, err := io.ReadFull(r, buf); err != nil {
-		return nil, fmt.Errorf("read %d bytes but expecting %d: %w", n, len(buf), err)
+		return Header{}, fmt.Errorf("read %d bytes but expecting %d: %w", n, len(buf), err)
 	}
 
 	if (len(buf)-1)%32 != 0 {
-		return nil, fmt.Errorf("invalid header size %d bytes", headerLen)
+		return Header{}, fmt.Errorf("invalid header size %d bytes", headerLen)
 	}
 
 	if buf[len(buf)-1] != 0x0D {
-		return nil, fmt.Errorf("missing field descriptor terminator")
+		return Header{}, fmt.Errorf("missing field descriptor terminator")
 	}
 
 	numFields := (len(buf) - 1) / 32
-	out.Fields = make([]*FieldDesc, numFields)
+	out.Fields = make([]FieldDesc, numFields)
 	for i := 0; i < numFields; i++ {
 		f, err := DecodeFieldDesc(buf[i*32 : (i*32)+32])
 		if err != nil {
-			return nil, fmt.Errorf("failed to decode field %d: %w", i, err)
+			return Header{}, fmt.Errorf("failed to decode field %d: %w", i, err)
 		}
 		out.Fields[i] = f
 	}

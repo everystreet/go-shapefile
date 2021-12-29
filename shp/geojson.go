@@ -1,22 +1,34 @@
 package shp
 
-import geojson "github.com/everystreet/go-geojson/v2"
+import geojson "github.com/everystreet/go-geojson/v3"
 
 // GeoJSONFeature creates a GeoJSON Point from a Shapefile Point.
-func (p Point) GeoJSONFeature() *geojson.Feature {
-	return geojson.NewPoint(p.Point.X, p.Point.Y)
+func (p Point) GeoJSONFeature() *geojson.Feature[geojson.Geometry] {
+	return &geojson.Feature[geojson.Geometry]{
+		Geometry: geojson.NewPoint(p.Point.X, p.Point.Y),
+	}
 }
 
 // GeoJSONFeature creates a GeoJSON MultiLineString from a Shapefile Polyline.
-func (p Polyline) GeoJSONFeature() *geojson.Feature {
-	strings := sliceOfPositionSlices(p.Parts)
-	return withBox(&p.BoundingBox, geojson.NewMultiLineString(strings...))
+func (p Polyline) GeoJSONFeature() *geojson.Feature[geojson.Geometry] {
+	return &geojson.Feature[geojson.Geometry]{
+		Geometry: geojson.NewMultiLineString(sliceOfPositionSlices(p.Parts)...),
+		BBox: &geojson.BoundingBox{
+			BottomLeft: geojson.MakePosition(p.BoundingBox.MinY, p.BoundingBox.MinX),
+			TopRight:   geojson.MakePosition(p.BoundingBox.MaxY, p.BoundingBox.MaxX),
+		},
+	}
 }
 
 // GeoJSONFeature creates a GeoJSON Polygon from a Shapefile Polygon.
-func (p Polygon) GeoJSONFeature() *geojson.Feature {
-	strings := sliceOfPositionSlices(p.Parts)
-	return withBox(&p.BoundingBox, geojson.NewPolygon(strings...))
+func (p Polygon) GeoJSONFeature() *geojson.Feature[geojson.Geometry] {
+	return &geojson.Feature[geojson.Geometry]{
+		Geometry: geojson.NewPolygon(sliceOfPositionSlices(p.Parts)...),
+		BBox: &geojson.BoundingBox{
+			BottomLeft: geojson.MakePosition(p.BoundingBox.MinY, p.BoundingBox.MinX),
+			TopRight:   geojson.MakePosition(p.BoundingBox.MaxY, p.BoundingBox.MaxX),
+		},
+	}
 }
 
 func sliceOfPositionSlices(parts []Part) [][]geojson.Position {
@@ -28,11 +40,4 @@ func sliceOfPositionSlices(parts []Part) [][]geojson.Position {
 		}
 	}
 	return strings
-}
-
-func withBox(b *BoundingBox, f *geojson.Feature) *geojson.Feature {
-	return f.WithBoundingBox(
-		geojson.MakePosition(b.MinY, b.MinX),
-		geojson.MakePosition(b.MaxY, b.MaxX),
-	)
 }

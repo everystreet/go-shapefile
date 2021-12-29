@@ -26,15 +26,14 @@ type FieldDesc struct {
 }
 
 // DecodeFieldDesc parses a single field descriptor.
-func DecodeFieldDesc(buf []byte) (*FieldDesc, error) {
+func DecodeFieldDesc(buf []byte) (FieldDesc, error) {
 	if len(buf) < 32 {
-		return nil, fmt.Errorf("expecting 32 bytes but have %d", len(buf))
+		return FieldDesc{}, fmt.Errorf("expecting 32 bytes but have %d", len(buf))
 	}
 
-	name := bytes.Trim(buf[0:11], "\x00")
-	return &FieldDesc{
+	return FieldDesc{
 		Type: FieldType(buf[11]),
-		name: string(name),
+		name: string(bytes.Trim(buf[0:11], "\x00")),
 		len:  buf[16],
 	}, nil
 }

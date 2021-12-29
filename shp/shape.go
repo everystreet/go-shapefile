@@ -1,7 +1,7 @@
 package shp
 
 import (
-	geojson "github.com/everystreet/go-geojson/v2"
+	geojson "github.com/everystreet/go-geojson/v3"
 	"github.com/golang/geo/r2"
 )
 
@@ -68,7 +68,7 @@ type Shape interface {
 	Type() ShapeType
 	RecordNumber() uint32
 	Validate(Validator) error
-	GeoJSONFeature() *geojson.Feature
+	GeoJSONFeature() *geojson.Feature[geojson.Geometry]
 	points() []r2.Point
 }
 

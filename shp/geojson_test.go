@@ -3,7 +3,7 @@ package shp_test
 import (
 	"testing"
 
-	geojson "github.com/everystreet/go-geojson/v2"
+	geojson "github.com/everystreet/go-geojson/v3"
 	"github.com/everystreet/go-shapefile/shp"
 	"github.com/stretchr/testify/require"
 )
@@ -14,7 +14,7 @@ func TestPointToGeoJSON(t *testing.T) {
 }
 
 func TestPolylineToGeoJSON(t *testing.T) {
-	p := shp.Polyline{
+	polyline := shp.Polyline{
 		BoundingBox: shp.BoundingBox{
 			MinX: 1,
 			MinY: 1,
@@ -30,20 +30,24 @@ func TestPolylineToGeoJSON(t *testing.T) {
 	}
 
 	require.Equal(t,
-		geojson.NewMultiLineString(
-			[]geojson.Position{
-				geojson.MakePosition(56.78, 12.34),
-				geojson.MakePosition(67.89, 23.45),
-			}).
-			WithBoundingBox(
-				geojson.MakePosition(1, 1),
-				geojson.MakePosition(100, 100),
+		geojson.Feature[*geojson.MultiLineString]{
+			Geometry: geojson.NewMultiLineString(
+				[]geojson.Position{
+					geojson.MakePosition(56.78, 12.34),
+					geojson.MakePosition(67.89, 23.45),
+				},
 			),
-		p.GeoJSONFeature())
+			BBox: &geojson.BoundingBox{
+				BottomLeft: geojson.MakePosition(1, 1),
+				TopRight:   geojson.MakePosition(100, 100),
+			},
+		},
+		*polyline.GeoJSONFeature(),
+	)
 }
 
 func TestPolygonToGeoJSON(t *testing.T) {
-	p := shp.Polygon{
+	polygon := shp.Polygon{
 		BoundingBox: shp.BoundingBox{
 			MinX: 1,
 			MinY: 1,
@@ -59,14 +63,18 @@ func TestPolygonToGeoJSON(t *testing.T) {
 	}
 
 	require.Equal(t,
-		geojson.NewPolygon(
-			[]geojson.Position{
-				geojson.MakePosition(56.78, 12.34),
-				geojson.MakePosition(67.89, 23.45),
-			}).
-			WithBoundingBox(
-				geojson.MakePosition(1, 1),
-				geojson.MakePosition(100, 100),
+		geojson.Feature[*geojson.Polygon]{
+			Geometry: geojson.NewPolygon(
+				[]geojson.Position{
+					geojson.MakePosition(56.78, 12.34),
+					geojson.MakePosition(67.89, 23.45),
+				},
 			),
-		p.GeoJSONFeature())
+			BBox: &geojson.BoundingBox{
+				BottomLeft: geojson.MakePosition(1, 1),
+				TopRight:   geojson.MakePosition(100, 100),
+			},
+		},
+		*polygon.GeoJSONFeature(),
+	)
 }
