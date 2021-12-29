@@ -25,7 +25,7 @@ func TestReader(t *testing.T) {
 	require.Equal(t, dbf.DBaseLevel5, h.Version())
 	require.Equal(t, 1869, int(h.RecordLen()))
 	require.Equal(t, 171, int(h.NumRecords()))
-	require.Len(t, h.Fields, 94)
+	require.Len(t, h.Fields(), 94)
 
 	var num uint32
 	for {
@@ -62,7 +62,7 @@ func TestReader2(t *testing.T) {
 	require.Equal(t, dbf.DBaseLevel5, h.Version())
 	require.Equal(t, 170, int(h.RecordLen()))
 	require.Equal(t, 2274, int(h.NumRecords()))
-	require.Len(t, h.Fields, 17)
+	require.Len(t, h.Fields(), 17)
 
 	var num uint32
 	for {

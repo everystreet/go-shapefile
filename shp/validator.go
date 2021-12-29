@@ -48,11 +48,11 @@ func (p Point) Validate(v Validator) error {
 
 // Validate the Polyline.
 func (p Polyline) Validate(v Validator) error {
-	if len(p.Parts) < 1 {
+	if len(p.parts) < 1 {
 		return fmt.Errorf("must contain at least 1 part")
 	}
 
-	for _, part := range p.Parts {
+	for _, part := range p.parts {
 		latlngs := make([]s2.LatLng, len(part))
 		for i, point := range part {
 			if err := point.Validate(v); err != nil {
@@ -75,8 +75,8 @@ func (p Polygon) Validate(v Validator) error {
 }
 
 func boxToRect(box BoundingBox) (s2.Rect, error) {
-	tl := s2.LatLngFromDegrees(box.MaxY, box.MinX)
-	br := s2.LatLngFromDegrees(box.MinY, box.MaxX)
+	tl := s2.LatLngFromDegrees(box.maxY, box.minX)
+	br := s2.LatLngFromDegrees(box.minY, box.maxX)
 
 	rect := s2.Rect{
 		Lat: r1.Interval{Lo: br.Lat.Radians(), Hi: tl.Lat.Radians()},

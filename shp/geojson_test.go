@@ -18,20 +18,15 @@ func TestPointToGeoJSON(t *testing.T) {
 }
 
 func TestPolylineToGeoJSON(t *testing.T) {
-	polyline := shp.Polyline{
-		BoundingBox: shp.BoundingBox{
-			MinX: 1,
-			MinY: 1,
-			MaxX: 100,
-			MaxY: 100,
-		},
-		Parts: []shp.Part{
+	polyline := shp.MakePolyline(
+		[]shp.Part{
 			{
 				shp.MakePoint(12.34, 56.78),
 				shp.MakePoint(23.45, 67.89),
 			},
 		},
-	}
+		shp.MakeBoundingBox(1, 1, 100, 100),
+	)
 
 	require.Equal(t,
 		geojson.Feature[geojson.Geometry]{
@@ -50,20 +45,15 @@ func TestPolylineToGeoJSON(t *testing.T) {
 }
 
 func TestPolygonToGeoJSON(t *testing.T) {
-	polygon := shp.Polygon{
-		BoundingBox: shp.BoundingBox{
-			MinX: 1,
-			MinY: 1,
-			MaxX: 100,
-			MaxY: 100,
-		},
-		Parts: []shp.Part{
+	polygon := shp.MakePolygon(
+		[]shp.Part{
 			{
 				shp.MakePoint(12.34, 56.78),
 				shp.MakePoint(23.45, 67.89),
 			},
 		},
-	}
+		shp.MakeBoundingBox(1, 1, 100, 100),
+	)
 
 	require.Equal(t,
 		geojson.Feature[geojson.Geometry]{

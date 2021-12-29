@@ -57,9 +57,9 @@ func (r *Reader) Info() (Info, error) {
 		}
 
 		r.info = Info{
-			BoundingBox: shpHeader.BoundingBox,
+			BoundingBox: shpHeader.BoundingBox(),
 			NumRecords:  dbfHeader.NumRecords(),
-			ShapeType:   shpHeader.ShapeType,
+			ShapeType:   shpHeader.ShapeType(),
 			Fields:      dbfHeader.Fields(),
 		}
 	})

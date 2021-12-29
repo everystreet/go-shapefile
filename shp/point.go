@@ -11,7 +11,6 @@ import (
 // Point is a single pair of X and Y coordinates.
 type Point struct {
 	r2.Point
-
 	number uint32
 	box    *BoundingBox
 }

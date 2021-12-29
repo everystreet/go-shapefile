@@ -9,14 +9,20 @@ import (
 
 // Polyline is an ordered set of verticies that consists of one or more parts, where a part is one or more Point.
 type Polyline struct {
-	BoundingBox BoundingBox
-	Parts       []Part
-
+	parts  []Part
+	box    BoundingBox
 	number uint32
 }
 
 // Part is a sequence of Points.
 type Part []Point
+
+func MakePolyline(parts []Part, box BoundingBox) Polyline {
+	return Polyline{
+		parts: parts,
+		box:   box,
+	}
+}
 
 // DecodePolyline parses a single polyline shape, but does not validate its complicance with the spec.
 func DecodePolyline(buf []byte, num uint32) (Polyline, error) {
@@ -39,9 +45,17 @@ func (p Polyline) RecordNumber() uint32 {
 	return p.number
 }
 
+func (p Polyline) Parts() []Part {
+	return p.parts
+}
+
+func (p Polyline) BoundingBox() BoundingBox {
+	return p.box
+}
+
 func (p Polyline) points() []r2.Point {
 	var out []r2.Point
-	for _, part := range p.Parts {
+	for _, part := range p.parts {
 		for _, point := range part {
 			out = append(out, point.Point)
 		}
@@ -51,6 +65,13 @@ func (p Polyline) points() []r2.Point {
 
 // Polygon has the same syntax as a Polyline, but the parts should be unbroken rings.
 type Polygon Polyline
+
+func MakePolygon(parts []Part, box BoundingBox) Polygon {
+	return Polygon{
+		parts: parts,
+		box:   box,
+	}
+}
 
 // DecodePolygon decodes a single polygon shape, but does not validate its complicance with the spec.
 func DecodePolygon(buf []byte, num uint32) (Polygon, error) {
@@ -79,6 +100,14 @@ func (p Polygon) Type() ShapeType {
 // RecordNumber returns the position in the shape file.
 func (p Polygon) RecordNumber() uint32 {
 	return p.number
+}
+
+func (p Polygon) Parts() []Part {
+	return p.parts
+}
+
+func (p Polygon) BoundingBox() BoundingBox {
+	return p.box
 }
 
 func (p Polygon) points() []r2.Point {
@@ -111,9 +140,9 @@ func decodePolyline(buf []byte, num uint32, precision *uint) (Polyline, error) {
 	}
 
 	out := Polyline{
-		BoundingBox: box,
-		Parts:       make([]Part, numParts),
-		number:      num,
+		parts:  make([]Part, numParts),
+		box:    box,
+		number: num,
 	}
 
 	parts := make([]uint32, numParts)
@@ -140,15 +169,15 @@ func decodePolyline(buf []byte, num uint32, precision *uint) (Polyline, error) {
 			end = parts[i+1]
 		}
 
-		out.Parts[i] = make(Part, end-start)
-		for j := 0; j < len(out.Parts[i]); j++ {
+		out.parts[i] = make(Part, end-start)
+		for j := 0; j < len(out.parts[i]); j++ {
 			x := int(start) + j
 			p, err := point(buf[pointsOffset+(x*16):pointsOffset+(x*16)+16], num)
 			if err != nil {
 				return Polyline{}, fmt.Errorf("failed to decode point: %w", err)
 			}
 			p.box = &box
-			out.Parts[i][j] = p
+			out.parts[i][j] = p
 		}
 	}
 	return out, nil

@@ -84,9 +84,9 @@ func (s Shapes) BoundingBox() BoundingBox {
 
 	rect := r2.RectFromPoints(points...)
 	return BoundingBox{
-		MinX: rect.X.Lo,
-		MinY: rect.Y.Lo,
-		MaxX: rect.X.Hi,
-		MaxY: rect.Y.Hi,
+		minX: rect.X.Lo,
+		minY: rect.Y.Lo,
+		maxX: rect.X.Hi,
+		maxY: rect.Y.Hi,
 	}
 }

@@ -9,12 +9,7 @@ import (
 
 func TestValidatePolyline(t *testing.T) {
 	v, err := shp.MakeValidator(
-		shp.BoundingBox{
-			MinY: -90,
-			MaxY: 90,
-			MinX: -180,
-			MaxX: 180,
-		},
+		shp.MakeBoundingBox(-180, -90, 180, 90),
 	)
 	require.NoError(t, err)
 
@@ -30,13 +25,14 @@ func TestValidatePolyline(t *testing.T) {
 		},
 		{
 			"no edges",
-			shp.Polyline{
-				Parts: []shp.Part{
+			shp.MakePolyline(
+				[]shp.Part{
 					{
 						shp.MakePoint(0, 0),
 					},
 				},
-			},
+				shp.MakeBoundingBox(0, 0, 0, 0),
+			),
 			"part must have at least 1 edge",
 		},
 	}

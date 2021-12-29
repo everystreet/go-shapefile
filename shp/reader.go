@@ -49,8 +49,7 @@ func (r *Reader) Validator() (Validator, error) {
 	if err != nil {
 		return Validator{}, fmt.Errorf("failed to decode header: %w", err)
 	}
-
-	return MakeValidator(h.BoundingBox)
+	return MakeValidator(h.box)
 }
 
 // Shape reads the next shape from the shp file.
@@ -72,11 +71,11 @@ func (r *Reader) decodeRecord(rec record) (Shape, error) {
 
 	if rec.shapeType == NullType {
 		return nil, nil
-	} else if rec.shapeType != h.ShapeType {
-		return nil, fmt.Errorf("shape type %d differs from expected type %d", rec.shapeType, h.ShapeType)
+	} else if rec.shapeType != h.typ {
+		return nil, fmt.Errorf("shape type %d differs from expected type %d", rec.shapeType, h.typ)
 	}
 
-	switch h.ShapeType {
+	switch h.typ {
 	case PointType:
 		if r.conf.precision == nil {
 			return DecodePoint(rec.shape, rec.number)
@@ -93,7 +92,7 @@ func (r *Reader) decodeRecord(rec record) (Shape, error) {
 		}
 		return DecodePolygonP(rec.shape, rec.number, *r.conf.precision)
 	default:
-		return nil, fmt.Errorf("unknown shape type %d", h.ShapeType)
+		return nil, fmt.Errorf("unknown shape type %d", h.typ)
 	}
 }
 

@@ -23,17 +23,10 @@ func TestReader(t *testing.T) {
 	h, err := r.Header()
 	require.NoError(t, err)
 
-	require.Equal(t, shp.Header{
-		FileLength: 180400,
-		Version:    1000,
-		ShapeType:  shp.PolygonType,
-		BoundingBox: shp.BoundingBox{
-			MinX: -180.000000,
-			MinY: -90.000000,
-			MaxX: 180.000000,
-			MaxY: 83.645130,
-		},
-	}, h)
+	require.Equal(t, 180400, int(h.FileLength()))
+	require.Equal(t, 1000, int(h.Version()))
+	require.Equal(t, shp.PolygonType, h.ShapeType())
+	require.Equal(t, shp.MakeBoundingBox(-180.000000, -90.000000, 180.000000, 83.645130), h.BoundingBox())
 
 	v, err := r.Validator()
 	require.NoError(t, err)
@@ -49,12 +42,12 @@ func TestReader(t *testing.T) {
 
 		require.NoError(t, err)
 
-		require.Equal(t, h.ShapeType, shape.Type())
+		require.Equal(t, h.ShapeType(), shape.Type())
 		require.NoError(t, shape.Validate(v))
 
 		switch s := shape.(type) {
 		case shp.Polygon:
-			for _, p := range s.Parts {
+			for _, p := range s.Parts() {
 				points += len(p)
 			}
 		}

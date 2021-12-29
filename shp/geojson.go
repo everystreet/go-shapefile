@@ -2,32 +2,34 @@ package shp
 
 import geojson "github.com/everystreet/go-geojson/v3"
 
-// GeoJSONFeature creates a GeoJSON Point from a Shapefile Point.
+// GeoJSONBoundingBox creates a GeoJSON bounding box from the shapefile bounding box.
+func (b BoundingBox) GeoJSONBoundingBox() *geojson.BoundingBox {
+	return &geojson.BoundingBox{
+		BottomLeft: geojson.MakePosition(b.minY, b.minX),
+		TopRight:   geojson.MakePosition(b.maxY, b.maxX),
+	}
+}
+
+// GeoJSONFeature creates a GeoJSON Point from the shapefile Point.
 func (p Point) GeoJSONFeature() *geojson.Feature[geojson.Geometry] {
 	return &geojson.Feature[geojson.Geometry]{
 		Geometry: geojson.NewPoint(p.Point.X, p.Point.Y),
 	}
 }
 
-// GeoJSONFeature creates a GeoJSON MultiLineString from a Shapefile Polyline.
+// GeoJSONFeature creates a GeoJSON MultiLineString from the shapefile Polyline.
 func (p Polyline) GeoJSONFeature() *geojson.Feature[geojson.Geometry] {
 	return &geojson.Feature[geojson.Geometry]{
-		Geometry: geojson.NewMultiLineString(sliceOfPositionSlices(p.Parts)...),
-		BBox: &geojson.BoundingBox{
-			BottomLeft: geojson.MakePosition(p.BoundingBox.MinY, p.BoundingBox.MinX),
-			TopRight:   geojson.MakePosition(p.BoundingBox.MaxY, p.BoundingBox.MaxX),
-		},
+		Geometry: geojson.NewMultiLineString(sliceOfPositionSlices(p.parts)...),
+		BBox:     p.box.GeoJSONBoundingBox(),
 	}
 }
 
-// GeoJSONFeature creates a GeoJSON Polygon from a Shapefile Polygon.
+// GeoJSONFeature creates a GeoJSON Polygon from the shapefile Polygon.
 func (p Polygon) GeoJSONFeature() *geojson.Feature[geojson.Geometry] {
 	return &geojson.Feature[geojson.Geometry]{
-		Geometry: geojson.NewPolygon(sliceOfPositionSlices(p.Parts)...),
-		BBox: &geojson.BoundingBox{
-			BottomLeft: geojson.MakePosition(p.BoundingBox.MinY, p.BoundingBox.MinX),
-			TopRight:   geojson.MakePosition(p.BoundingBox.MaxY, p.BoundingBox.MaxX),
-		},
+		Geometry: geojson.NewPolygon(sliceOfPositionSlices(p.parts)...),
+		BBox:     p.box.GeoJSONBoundingBox(),
 	}
 }
 
