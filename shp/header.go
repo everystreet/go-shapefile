@@ -24,16 +24,16 @@ func DecodeHeader(buf []byte, precision *uint) (Header, error) {
 		return Header{}, fmt.Errorf("bad file code")
 	}
 
-	shape := binary.LittleEndian.Uint32(buf[32:36])
-	if !validShapeType(shape) {
-		return Header{}, fmt.Errorf("invalid shape type %d", shape)
+	typ := ShapeType(binary.LittleEndian.Uint32(buf[32:36]))
+	if err := validateShapeType(typ); err != nil {
+		return Header{}, err
 	}
 
 	out := Header{
 		// File length is in 16-bit words, but bytes is more useful.
 		fileLen: binary.BigEndian.Uint32(buf[24:28]) * 2,
 		version: binary.LittleEndian.Uint32(buf[28:32]),
-		typ:     ShapeType(shape),
+		typ:     typ,
 	}
 
 	var err error
@@ -66,8 +66,8 @@ func (h Header) BoundingBox() BoundingBox {
 	return h.box
 }
 
-func validShapeType(u uint32) bool {
-	switch ShapeType(u) {
+func validateShapeType(typ ShapeType) error {
+	switch typ {
 	case
 		PointType,
 		PolylineType,
@@ -82,8 +82,8 @@ func validShapeType(u uint32) bool {
 		PolygonMType,
 		MultiPointMType,
 		MultiPatchType:
-		return true
+		return nil
 	default:
-		return false
+		return fmt.Errorf("unrecognized shape type '%d'", typ)
 	}
 }
