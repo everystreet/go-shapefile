@@ -9,7 +9,7 @@ import (
 
 // Record represents a single record, primarly consisting of a set of fields.
 type Record struct {
-	Fields  map[string]Field
+	fields  map[string]Field
 	deleted bool
 }
 
@@ -20,6 +20,22 @@ type Field interface {
 	Equal(string) bool
 }
 
+// MakeRecord with the specified fields.
+func MakeRecord(deleted bool, fields ...Field) (Record, error) {
+	out := Record{
+		fields:  make(map[string]Field, len(fields)),
+		deleted: deleted,
+	}
+
+	for _, f := range fields {
+		if _, ok := out.fields[f.Name()]; ok {
+			return Record{}, fmt.Errorf("duplicate field with name '%s'", f.Name())
+		}
+		out.fields[f.Name()] = f
+	}
+	return out, nil
+}
+
 // DecodeRecord decodes a dBase 5 single record.
 func DecodeRecord(buf []byte, header Header, decoder *encoding.Decoder, selectedFields []string) (Record, error) {
 	if len(buf) < 1 {
@@ -27,7 +43,7 @@ func DecodeRecord(buf []byte, header Header, decoder *encoding.Decoder, selected
 	}
 
 	rec := &Record{
-		Fields: make(map[string]Field, len(header.Fields)-len(selectedFields)),
+		fields: make(map[string]Field, len(header.Fields())-len(selectedFields)),
 	}
 
 	switch buf[0] {
@@ -40,7 +56,7 @@ func DecodeRecord(buf []byte, header Header, decoder *encoding.Decoder, selected
 	}
 
 	pos := 1
-	for i, desc := range header.Fields {
+	for i, desc := range header.Fields() {
 		if len(buf) < (pos + int(desc.len)) {
 			return Record{}, fmt.Errorf(fieldDecodeErr, desc.name, i, fmt.Errorf("expecting %d bytes but have %d", desc.len, len(buf)-pos))
 		}
@@ -56,7 +72,7 @@ func DecodeRecord(buf []byte, header Header, decoder *encoding.Decoder, selected
 		var f Field
 		var err error
 
-		switch desc.Type {
+		switch desc.Type() {
 		case CharacterType:
 			f, err = field.DecodeCharacter(buf[start:end], desc.name, decoder)
 		case DateType:
@@ -66,17 +82,28 @@ func DecodeRecord(buf []byte, header Header, decoder *encoding.Decoder, selected
 		case NumericType:
 			f, err = field.DecodeNumeric(buf[start:end], desc.name)
 		default:
-			return Record{}, fmt.Errorf(fieldDecodeErr, desc.name, i,
-				fmt.Errorf("unsupported field type '%c'", desc.Type))
+			return Record{}, fmt.Errorf(fieldDecodeErr, desc.name, i, fmt.Errorf("unsupported field type '%c'", desc.Type()))
 		}
 
 		if err != nil {
 			return Record{}, fmt.Errorf(fieldDecodeErr, desc.name, i, err)
 		}
-		rec.Fields[f.Name()] = f
+
+		rec.fields[f.Name()] = f
 	}
 
 	return Record{}, nil
+}
+
+// Fields returns the fields of the record.
+func (r Record) Fields() []Field {
+	out := make([]Field, len(r.fields))
+	var i int
+	for _, f := range r.fields {
+		out[i] = f
+		i++
+	}
+	return out
 }
 
 // Deleted returns the value of the deleted flag.

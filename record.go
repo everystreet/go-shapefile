@@ -24,10 +24,11 @@ func (r Record) GeoJSONFeature(opts ...GeoJSONOption) *geojson.Feature[geojson.G
 		return feature
 	}
 
-	feature.Properties = make(geojson.PropertyList, len(r.Record.Fields))
+	fields := r.Record.Fields()
+	feature.Properties = make(geojson.PropertyList, len(fields))
 
 	var i int
-	for _, f := range r.Record.Fields {
+	for _, f := range fields {
 		name := f.Name()
 		if newName, ok := conf.oldNewPropNames[name]; ok {
 			name = newName

@@ -11,15 +11,16 @@ import (
 )
 
 func TestRecordToGeoJSON(t *testing.T) {
+	dbf, err := dbf.MakeRecord(false,
+		Field{"prop1", "value1"},
+		Field{"prop2", 2},
+		Field{"prop3", "value3"},
+	)
+	require.NoError(t, err)
+
 	record := shapefile.Record{
-		Shape: shp.MakePoint(0, 0),
-		Record: &dbf.Record{
-			Fields: map[string]dbf.Field{
-				"prop1": Field{"prop1", "value1"},
-				"prop2": Field{"prop2", 2},
-				"prop3": Field{"prop3", "value3"},
-			},
-		},
+		Shape:  shp.MakePoint(0, 0),
+		Record: &dbf,
 	}
 
 	t.Run("simple", func(t *testing.T) {

@@ -8,7 +8,7 @@ import (
 
 // Header represents a dBase 5 file header.
 type Header struct {
-	Fields  []FieldDesc
+	fields  []FieldDesc
 	version Version
 	recLen  uint16
 	numRecs uint32
@@ -56,16 +56,21 @@ func DecodeHeader(r io.Reader) (Header, error) {
 	}
 
 	numFields := (len(buf) - 1) / 32
-	out.Fields = make([]FieldDesc, numFields)
+	out.fields = make([]FieldDesc, numFields)
 	for i := 0; i < numFields; i++ {
 		f, err := DecodeFieldDesc(buf[i*32 : (i*32)+32])
 		if err != nil {
 			return Header{}, fmt.Errorf("failed to decode field %d: %w", i, err)
 		}
-		out.Fields[i] = f
+		out.fields[i] = f
 	}
 
 	return out, nil
+}
+
+// Fields returns the list of field descriptors.
+func (h Header) Fields() []FieldDesc {
+	return h.fields
 }
 
 // Version returns the dBase version.
@@ -81,13 +86,4 @@ func (h Header) RecordLen() uint16 {
 // NumRecords returns the number of records in the file.
 func (h Header) NumRecords() uint32 {
 	return h.numRecs
-}
-
-func (h Header) FieldExists(name string) bool {
-	for _, field := range h.Fields {
-		if field.name == name {
-			return true
-		}
-	}
-	return false
 }

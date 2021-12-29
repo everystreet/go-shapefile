@@ -20,7 +20,7 @@ const (
 
 // FieldDesc represents a field descriptor consisting of a type, name and size in bytes.
 type FieldDesc struct {
-	Type FieldType
+	typ  FieldType
 	name string
 	len  uint8
 }
@@ -32,10 +32,15 @@ func DecodeFieldDesc(buf []byte) (FieldDesc, error) {
 	}
 
 	return FieldDesc{
-		Type: FieldType(buf[11]),
+		typ:  FieldType(buf[11]),
 		name: string(bytes.Trim(buf[0:11], "\x00")),
 		len:  buf[16],
 	}, nil
+}
+
+// Type of the field.
+func (f FieldDesc) Type() FieldType {
+	return f.typ
 }
 
 // Name of the field.

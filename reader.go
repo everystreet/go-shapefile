@@ -60,7 +60,7 @@ func (r *Reader) Info() (Info, error) {
 			BoundingBox: shpHeader.BoundingBox,
 			NumRecords:  dbfHeader.NumRecords(),
 			ShapeType:   shpHeader.ShapeType,
-			Fields:      dbfHeader.Fields,
+			Fields:      dbfHeader.Fields(),
 		}
 	})
 	return r.info, err
