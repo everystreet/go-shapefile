@@ -28,16 +28,6 @@ type config struct {
 	fields  []string
 }
 
-// CharacterDecoder returns the configured encoding.
-func (c config) CharacterDecoder() *encoding.Decoder {
-	return c.decoder
-}
-
-// FilteredFields returns the configured field names.
-func (c config) FilteredFields() []string {
-	return c.fields
-}
-
 func defaultConfig() config {
 	return config{
 		decoder: encoding.Nop.NewDecoder(),

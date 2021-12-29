@@ -26,7 +26,6 @@ func NewReader(r io.Reader, opts ...Option) *Reader {
 	for _, opt := range opts {
 		opt(&out.conf)
 	}
-
 	return &out
 }
 
@@ -55,7 +54,7 @@ func (r *Reader) Record() (*Record, error) {
 		return nil, NewError(fmt.Errorf("read %d bytes but expecting %d: %w", n, len(buf), err), r.recordsRead)
 	}
 
-	record, err := DecodeRecord(buf, r.header, r.conf)
+	record, err := DecodeRecord(buf, r.header, r.conf.decoder, r.conf.fields)
 	if err != nil {
 		return nil, NewError(err, r.recordsRead)
 	}

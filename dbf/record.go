@@ -20,20 +20,14 @@ type Field interface {
 	Equal(string) bool
 }
 
-// Config provides config for record parsing.
-type Config interface {
-	CharacterDecoder() *encoding.Decoder
-	FilteredFields() []string
-}
-
 // DecodeRecord decodes a dBase 5 single record.
-func DecodeRecord(buf []byte, header Header, conf Config) (Record, error) {
+func DecodeRecord(buf []byte, header Header, decoder *encoding.Decoder, selectedFields []string) (Record, error) {
 	if len(buf) < 1 {
 		return Record{}, fmt.Errorf("expecting 1 byte but have %d", len(buf))
 	}
 
 	rec := &Record{
-		Fields: make(map[string]Field, len(header.Fields)-len(conf.FilteredFields())),
+		Fields: make(map[string]Field, len(header.Fields)-len(selectedFields)),
 	}
 
 	switch buf[0] {
@@ -55,7 +49,7 @@ func DecodeRecord(buf []byte, header Header, conf Config) (Record, error) {
 		pos += int(desc.len)
 
 		// Filter out unwanted fields.
-		if !wantField(desc.name, conf.FilteredFields()) {
+		if !wantField(desc.name, selectedFields) {
 			continue
 		}
 
@@ -64,7 +58,7 @@ func DecodeRecord(buf []byte, header Header, conf Config) (Record, error) {
 
 		switch desc.Type {
 		case CharacterType:
-			f, err = field.DecodeCharacter(buf[start:end], desc.name, conf.CharacterDecoder())
+			f, err = field.DecodeCharacter(buf[start:end], desc.name, decoder)
 		case DateType:
 			f, err = field.DecodeDate(buf[start:end], desc.name)
 		case FloatingPointType:
