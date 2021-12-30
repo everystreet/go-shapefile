@@ -1,22 +1,36 @@
 package shp
 
-import "github.com/everystreet/go-geojson/v2"
+import geojson "github.com/everystreet/go-geojson/v3"
 
-// GeoJSONFeature creates a GeoJSON Point from a Shapefile Point.
-func (p Point) GeoJSONFeature() *geojson.Feature {
-	return geojson.NewPoint(p.X, p.Y)
+// GeoJSONBoundingBox creates a GeoJSON bounding box from the shapefile bounding box.
+func (b BoundingBox) GeoJSONBoundingBox() *geojson.BoundingBox {
+	return &geojson.BoundingBox{
+		BottomLeft: geojson.MakePosition(b.minY, b.minX),
+		TopRight:   geojson.MakePosition(b.maxY, b.maxX),
+	}
 }
 
-// GeoJSONFeature creates a GeoJSON MultiLineString from a Shapefile Polyline.
-func (p Polyline) GeoJSONFeature() *geojson.Feature {
-	strings := sliceOfPositionSlices(p.Parts)
-	return withBox(&p.BoundingBox, geojson.NewMultiLineString(strings...))
+// GeoJSONFeature creates a GeoJSON Point from the shapefile Point.
+func (p Point) GeoJSONFeature() *geojson.Feature[geojson.Geometry] {
+	return &geojson.Feature[geojson.Geometry]{
+		Geometry: geojson.NewPoint(p.Point.X, p.Point.Y),
+	}
 }
 
-// GeoJSONFeature creates a GeoJSON Polygon from a Shapefile Polygon.
-func (p Polygon) GeoJSONFeature() *geojson.Feature {
-	strings := sliceOfPositionSlices(p.Parts)
-	return withBox(&p.BoundingBox, geojson.NewPolygon(strings...))
+// GeoJSONFeature creates a GeoJSON MultiLineString from the shapefile Polyline.
+func (p Polyline) GeoJSONFeature() *geojson.Feature[geojson.Geometry] {
+	return &geojson.Feature[geojson.Geometry]{
+		Geometry: geojson.NewMultiLineString(sliceOfPositionSlices(p.parts)...),
+		BBox:     p.box.GeoJSONBoundingBox(),
+	}
+}
+
+// GeoJSONFeature creates a GeoJSON Polygon from the shapefile Polygon.
+func (p Polygon) GeoJSONFeature() *geojson.Feature[geojson.Geometry] {
+	return &geojson.Feature[geojson.Geometry]{
+		Geometry: geojson.NewPolygon(sliceOfPositionSlices(p.parts)...),
+		BBox:     p.box.GeoJSONBoundingBox(),
+	}
 }
 
 func sliceOfPositionSlices(parts []Part) [][]geojson.Position {
@@ -24,15 +38,8 @@ func sliceOfPositionSlices(parts []Part) [][]geojson.Position {
 	for i, part := range parts {
 		strings[i] = make([]geojson.Position, len(part))
 		for j, point := range part {
-			strings[i][j] = geojson.MakePosition(point.Y, point.X)
+			strings[i][j] = geojson.MakePosition(point.Point.Y, point.Point.X)
 		}
 	}
 	return strings
-}
-
-func withBox(b *BoundingBox, f *geojson.Feature) *geojson.Feature {
-	return f.WithBoundingBox(
-		geojson.MakePosition(b.MinY, b.MinX),
-		geojson.MakePosition(b.MaxY, b.MaxX),
-	)
 }

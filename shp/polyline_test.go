@@ -15,12 +15,12 @@ func TestDecodePolyline(t *testing.T) {
 	p, err := shp.DecodePolyline(buf, 0)
 	require.NoError(t, err)
 
-	require.Equal(t, box, p.BoundingBox)
+	require.Equal(t, box, p.BoundingBox())
 
-	require.Equal(t, 3, len(p.Parts))
-	pointsEqual(t, part1, p.Parts[0])
-	pointsEqual(t, part2, p.Parts[1])
-	pointsEqual(t, part3, p.Parts[2])
+	require.Equal(t, 3, len(p.Parts()))
+	pointsEqual(t, part1, p.Parts()[0])
+	pointsEqual(t, part2, p.Parts()[1])
+	pointsEqual(t, part3, p.Parts()[2])
 }
 
 func pointsEqual(t *testing.T, expected, actual []shp.Point) {
@@ -39,12 +39,7 @@ func normalizePoints(points []shp.Point) []shp.Point {
 // Consists of 3 parts with 8, 9 and 5 points, respectively.
 const data string = "00000000008066c036936fb6b94932c000000000008066402ec5218a580530c00300000016000000000000000800000011000000000000000080664072d6329b2f1130c00000000000806640aae943ac228e30c0dc06830ea76b6640cd00718a25cd30c06677b1af335766408d99c529150331c099e0404d19536640093d9b559fa330c0ebd1846c17636640560bf797196f30c032d5fc773b6d66409a797db3096130c0000000000080664072d6329b2f1130c07b6b60ab044466409ab1683a3b8131c024b9fc87f44b66409e4143ff045731c01b12f758fa5666401bd82ac1e2a031c082c5e1ccaf516640ca1af5108d2632c033c9c859d83d664036936fb6b94932c06e179aeb342c6640271422e0102a32c0a9c1340c1f296640e10b93a982b931c0c3bb5cc4773566408c321b64926131c07b6b60ab044466409ab1683a3b8131c0f073dae0627966c02ec5218a580530c0653d0a175b7d66c06a4c0ddc748030c000000000008066c0aae943ac228e30c000000000008066c072d6329b2f1130c0f073dae0627966c02ec5218a580530c0"
 
-var box = shp.BoundingBox{
-	MinX: -180,
-	MinY: -18.28799,
-	MaxX: 180,
-	MaxY: -16.020882256741224,
-}
+var box = shp.MakeBoundingBox(-180, -18.28799, 180, -16.020882256741224)
 
 var (
 	part1 = shp.Part{

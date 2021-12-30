@@ -1,7 +1,7 @@
 package shp
 
 import (
-	"github.com/everystreet/go-geojson/v2"
+	geojson "github.com/everystreet/go-geojson/v3"
 	"github.com/golang/geo/r2"
 )
 
@@ -68,7 +68,7 @@ type Shape interface {
 	Type() ShapeType
 	RecordNumber() uint32
 	Validate(Validator) error
-	GeoJSONFeature() *geojson.Feature
+	GeoJSONFeature() *geojson.Feature[geojson.Geometry]
 	points() []r2.Point
 }
 
@@ -84,9 +84,9 @@ func (s Shapes) BoundingBox() BoundingBox {
 
 	rect := r2.RectFromPoints(points...)
 	return BoundingBox{
-		MinX: rect.X.Lo,
-		MinY: rect.Y.Lo,
-		MaxX: rect.X.Hi,
-		MaxY: rect.Y.Hi,
+		minX: rect.X.Lo,
+		minY: rect.Y.Lo,
+		maxX: rect.X.Hi,
+		maxY: rect.Y.Hi,
 	}
 }

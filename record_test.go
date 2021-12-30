@@ -3,39 +3,46 @@ package shapefile_test
 import (
 	"testing"
 
-	"github.com/everystreet/go-geojson/v2"
-	"github.com/everystreet/go-shapefile"
+	geojson "github.com/everystreet/go-geojson/v3"
+	shapefile "github.com/everystreet/go-shapefile"
 	"github.com/everystreet/go-shapefile/dbf"
 	"github.com/everystreet/go-shapefile/shp"
 	"github.com/stretchr/testify/require"
 )
 
 func TestRecordToGeoJSON(t *testing.T) {
-	rec := shapefile.Record{
-		Shape: shp.MakePoint(0, 0),
-		Attributes: &fakeAttrs{
-			fields: []dbf.Field{
-				&fakeField{"prop1", "value1"},
-				&fakeField{"prop2", 2},
-				&fakeField{"prop3", "value3"},
-			},
-		},
+	dbf, err := dbf.MakeRecord(false,
+		Field{"prop1", "value1"},
+		Field{"prop2", 2},
+		Field{"prop3", "value3"},
+	)
+	require.NoError(t, err)
+
+	record := shapefile.Record{
+		Shape:  shp.MakePoint(0, 0),
+		Record: &dbf,
 	}
 
 	t.Run("simple", func(t *testing.T) {
-		require.Equal(t, geojson.NewPoint(0, 0).WithProperties(
-			geojson.Property{Name: "prop1", Value: "value1"},
-			geojson.Property{Name: "prop2", Value: 2},
-			geojson.Property{Name: "prop3", Value: "value3"},
-		), rec.GeoJSONFeature())
+		require.Equal(t, geojson.Feature[geojson.Geometry]{
+			Geometry: geojson.NewPoint(0, 0),
+			Properties: geojson.NewPropertyList(
+				geojson.Property{Name: "prop1", Value: "value1"},
+				geojson.Property{Name: "prop2", Value: 2},
+				geojson.Property{Name: "prop3", Value: "value3"},
+			),
+		}, *record.GeoJSONFeature())
 	})
 
 	t.Run("renamed properties", func(t *testing.T) {
-		require.Equal(t, geojson.NewPoint(0, 0).WithProperties(
-			geojson.Property{Name: "new-prop-name", Value: "value1"},
-			geojson.Property{Name: "new-prop-name", Value: 2},
-			geojson.Property{Name: "prop3", Value: "value3"},
-		), rec.GeoJSONFeature(
+		require.Equal(t, geojson.Feature[geojson.Geometry]{
+			Geometry: geojson.NewPoint(0, 0),
+			Properties: geojson.NewPropertyList(
+				geojson.Property{Name: "new-prop-name", Value: "value1"},
+				geojson.Property{Name: "new-prop-name", Value: 2},
+				geojson.Property{Name: "prop3", Value: "value3"},
+			),
+		}, *record.GeoJSONFeature(
 			shapefile.RenameProperties(map[string]string{
 				"prop1": "new-prop-name",
 				"prop2": "new-prop-name",
@@ -44,35 +51,19 @@ func TestRecordToGeoJSON(t *testing.T) {
 	})
 }
 
-type fakeAttrs struct {
-	fields []dbf.Field
-}
-
-func (f *fakeAttrs) Fields() []dbf.Field {
-	return f.fields
-}
-
-func (f *fakeAttrs) Field(name string) (dbf.Field, bool) {
-	return nil, false
-}
-
-func (f *fakeAttrs) Deleted() bool {
-	return false
-}
-
-type fakeField struct {
+type Field struct {
 	name  string
 	value interface{}
 }
 
-func (f *fakeField) Name() string {
+func (f Field) Name() string {
 	return f.name
 }
 
-func (f *fakeField) Value() interface{} {
+func (f Field) Value() interface{} {
 	return f.value
 }
 
-func (f *fakeField) Equal(_ string) bool {
+func (f Field) Equal(_ string) bool {
 	return false
 }
