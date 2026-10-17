@@ -113,6 +113,11 @@ func (s *Scanner) Scan(opts ...Option) error {
 					return
 				}
 				s.decodeRecord(rec, conf)
+
+				// stop at the first error, so that Record returns nil once it has occurred
+				if s.err != nil {
+					return
+				}
 			}
 
 			buf := make([]byte, 1)

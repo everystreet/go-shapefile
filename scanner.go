@@ -131,32 +131,28 @@ func (s *Scanner) Scan() error {
 		}
 
 		go func() {
-			defer func() {
-				if err := s.shp.Err(); err != nil {
-					s.setErr(fmt.Errorf("error in shp file: %w", err))
-				} else if err = s.dbf.Err(); err != nil {
-					s.setErr(fmt.Errorf("error in dbf file: %w", err))
-				}
+			defer close(s.recordsCh)
 
-				close(s.recordsCh)
-			}()
-
+			// the shp and dbf scanners set their errors from their own goroutines, so an error is only read
+			// once its scanner has closed its channel, which is when Shape or Record returns nil
 			for i := uint32(0); i < info.NumRecords; i++ {
 				shape := s.shp.Shape()
-				if err := s.shp.Err(); err != nil {
-					s.setErr(fmt.Errorf("error in shp file: %w", err))
-					return
-				} else if shape == nil {
-					s.setErr(fmt.Errorf("failed to read shape; expecting %d but have read %d", info.NumRecords, i+1))
+				if shape == nil {
+					if err := s.shp.Err(); err != nil {
+						s.setErr(fmt.Errorf("error in shp file: %w", err))
+					} else {
+						s.setErr(fmt.Errorf("failed to read shape; expecting %d but have read %d", info.NumRecords, i+1))
+					}
 					return
 				}
 
 				attr := s.dbf.Record()
-				if err = s.dbf.Err(); err != nil {
-					s.setErr(fmt.Errorf("error in dbf file: %w", err))
-					return
-				} else if attr == nil {
-					s.setErr(fmt.Errorf("failed to read attributes; expecting %d but have read %d", info.NumRecords, i+1))
+				if attr == nil {
+					if err := s.dbf.Err(); err != nil {
+						s.setErr(fmt.Errorf("error in dbf file: %w", err))
+					} else {
+						s.setErr(fmt.Errorf("failed to read attributes; expecting %d but have read %d", info.NumRecords, i+1))
+					}
 					return
 				}
 
@@ -164,6 +160,18 @@ func (s *Scanner) Scan() error {
 					Shape:      shape,
 					Attributes: attr,
 				}
+			}
+
+			// wait for both scanners to finish, to catch errors that follow the last record
+			for s.shp.Shape() != nil {
+			}
+			for s.dbf.Record() != nil {
+			}
+
+			if err := s.shp.Err(); err != nil {
+				s.setErr(fmt.Errorf("error in shp file: %w", err))
+			} else if err := s.dbf.Err(); err != nil {
+				s.setErr(fmt.Errorf("error in dbf file: %w", err))
 			}
 		}()
 	})

@@ -89,6 +89,11 @@ func (s *Scanner) Scan() error {
 					return
 				}
 				s.decodeRecord(*rec, conf)
+
+				// stop at the first error, so that Shape returns nil once it has occurred
+				if s.err != nil {
+					return
+				}
 			}
 		}()
 	})
